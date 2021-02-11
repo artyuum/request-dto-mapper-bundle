@@ -33,7 +33,7 @@ class ArtistPayload implements DtoInterface {
 }
 ```
 
-Your DTOs **must** implements the `DtoInterface` and define the request context using the `@Dto` annotation.
+Your DTOs **must** implement the `DtoInterface` and define the request context using the `@Dto` annotation.
 
 ## Events
 - **PreDtoMappingEvent** - disptached before the mapping is made, this allows you to alter the Serializer/Denormalizer options, or the Request object.
