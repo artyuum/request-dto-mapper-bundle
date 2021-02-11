@@ -40,3 +40,6 @@ Your DTOs **must** implement the `DtoInterface` and define the request context u
 - **PreDtoValidationEvent** - dispatched before the validation is made, this allows you to alter the DTO object (if the validation is enabled).
 - **PostDtoMappingEvent** - disptached at the very end of the process, this allows you to alter the DTO before it's passed to the controller.
 ****
+
+## Known limitations
+1. Doesn't work with DTOs that have dependencies. (e.g. injecting a class in the DTO's constructor) 
