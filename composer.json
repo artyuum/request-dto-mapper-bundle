@@ -1,5 +1,5 @@
 {
-    "name": "artyuum/symfony-request-dto-mapper-bundle",
+    "name": "artyuum/request-dto-mapper-bundle",
     "description": "This bundle provides an easy way to automatically map the incoming request data to a DTO and optionally validate it.",
     "type": "symfony-bundle",
     "require": {
