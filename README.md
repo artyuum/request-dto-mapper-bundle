@@ -44,9 +44,9 @@ Here is the list of options used in the `@Dto` annotation:
 | `validationGroups`   | array   | *null*  | no       | The validation groups to be used when validating the DTO.                                                         |
 
 ## Events
-- **PreDtoMappingEvent** - disptached before the mapping is made, this allows you to alter the Serializer/Denormalizer options, or the Request object.
-- **PreDtoValidationEvent** - dispatched before the validation is made, this allows you to alter the DTO object (if the validation is enabled).
-- **PostDtoMappingEvent** - disptached at the very end of the process, this allows you to alter the DTO before it's passed to the controller.
+- **[PreDtoMappingEvent](/src/Event/PreDtoMappingEvent.php)** - disptached before the mapping is made, this allows you to alter the Serializer/Denormalizer options, or the Request object.
+- **[PreDtoValidationEvent](/src/Event/PreDtoValidationEvent.php)** - dispatched before the validation is made, this allows you to alter the DTO object (if the validation is enabled).
+- **[PostDtoMappingEvent](/src/Event/PostDtoMappingEvent.php)** - disptached at the very end of the process, this allows you to alter the DTO before it's passed to the controller.
 
 ## Known limitations
 1. Doesn't work with DTOs that have dependencies. (e.g. injecting a class in the DTO's constructor) 
