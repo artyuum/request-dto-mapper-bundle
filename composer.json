@@ -8,7 +8,7 @@
         "symfony/serializer": "^4.4 || ^5.0",
         "symfony/http-kernel": "^4.4 || ^5.0",
         "doctrine/annotations": "^1.8",
-        "symfony/config": "^5.1"
+        "symfony/config": "^4.4 || ^5.0"
     },
     "license": "MIT",
     "authors": [
