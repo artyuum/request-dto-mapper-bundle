@@ -1,0 +1,28 @@
+{
+    "name": "artyuum/symfony-request-dto-mapper-bundle",
+    "description": "This bundle provides an easy way to automatically map the incoming request data to a DTO and optionally validate it.",
+    "type": "symfony-bundle",
+    "require": {
+        "php": "^7.4",
+        "symfony/validator": "^4.4 || ^5.0",
+        "symfony/serializer": "^4.4 || ^5.0",
+        "symfony/http-kernel": "^4.4 || ^5.0",
+        "doctrine/annotations": "^1.8",
+        "symfony/config": "^5.1"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Artyum Petrov",
+            "email": "artyum@protonmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Artyum\\RequestDtoMapperBundle\\": "src/"
+        },
+        "exclude-from-classmap": [
+            "/tests/"
+        ]
+    }
+}
