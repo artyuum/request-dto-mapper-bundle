@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- * This event is disptached at the very end of the mapping (and after the validation if enabled), this allows you to alter the DTO before it's passed to the controller.
+ * This event is dispatched at the very end of the mapping (and after the validation if enabled), this allows you to alter the DTO before it's passed to the controller.
  */
 class PostDtoMappingEvent extends Event
 {
