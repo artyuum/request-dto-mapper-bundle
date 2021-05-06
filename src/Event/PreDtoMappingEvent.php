@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- * This event is disptached before the mapping is made, this allows you to alter the Serializer/Denormalizer options or the Request object.
+ * This event is dispatched before the mapping is made, this allows you to alter the Serializer/Denormalizer options or the Request object.
  */
 class PreDtoMappingEvent extends Event
 {
