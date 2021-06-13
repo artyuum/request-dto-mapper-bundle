@@ -6,7 +6,7 @@
     <services>
         <service id="artyuum_request_dto_mapper.dtovalueresolver" class="Artyum\RequestDtoMapperBundle\ArgumentResolver\DtoValueResolver">
             <argument type="service" id="artyuum_request_dto_mapper.dto_mapper" />
-            <tag name="controller.argument_value_resolver" priority="-100" />
+            <tag name="controller.argument_value_resolver" />
         </service>
         <service id="artyuum_request_dto_mapper.dto_mapper" class="Artyum\RequestDtoMapperBundle\Mapper\DtoMapper">
             <argument type="service" id="event_dispatcher" />
