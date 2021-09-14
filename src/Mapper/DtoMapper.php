@@ -142,6 +142,8 @@ class DtoMapper
             $dto = $this->mapFromArray($preDtoMappingEvent->getRequest()->query->all(), $dto, $preDtoMappingEvent->getOptions());
         } elseif ($dtoAnnotation->source === 'body_parameters') {
             $dto = $this->mapFromArray($preDtoMappingEvent->getRequest()->request->all(), $dto, $preDtoMappingEvent->getOptions());
+        } elseif ($dtoAnnotation->source === 'files') {
+            $dto = $this->mapFromArray($preDtoMappingEvent->getRequest()->files->all(), $dto, $preDtoMappingEvent->getOptions());
         } elseif ($dtoAnnotation->source === 'json') {
             $dto = $this->mapFromJson($preDtoMappingEvent->getRequest()->getContent(), $dto, $preDtoMappingEvent->getOptions());
         }
