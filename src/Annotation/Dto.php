@@ -11,7 +11,7 @@ class Dto
     public array $methods;
 
     /**
-     * @Enum({"json", "query_strings", "body_parameters"})
+     * @Enum({"json", "query_strings", "body_parameters", "files"})
      */
     public string $source;
 
