@@ -20,7 +20,7 @@ class DtoValueResolver implements ArgumentValueResolverInterface
         $this->dtoMapper = $dtoMapper;
     }
 
-    public function supports(Request $request, ArgumentMetadata $argument)
+    public function supports(Request $request, ArgumentMetadata $argument): bool
     {
         return
             class_exists($argument->getType()) &&
@@ -28,7 +28,7 @@ class DtoValueResolver implements ArgumentValueResolverInterface
         ;
     }
 
-    public function resolve(Request $request, ArgumentMetadata $argument)
+    public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
         yield $this->dtoMapper->map($request, $argument->getType());
     }
