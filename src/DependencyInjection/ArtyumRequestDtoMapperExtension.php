@@ -14,8 +14,8 @@ class ArtyumRequestDtoMapperExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $loader = new Loader\XmlFileLoader($container, new FileLocator(dirname(__DIR__) . '/Resources/config'));
-        $loader->load('services.xml');
+        $loader = new Loader\PhpFileLoader($container, new FileLocator(dirname(__DIR__) . '/Resources/config'));
+        $loader->load('services.php');
 
         $container->setParameter('artyum_request_dto_mapper.enabled', $config['enabled']);
     }

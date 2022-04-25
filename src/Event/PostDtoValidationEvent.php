@@ -8,8 +8,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- * This event is dispatched once the mapping is done (and before the validation if enabled), this allows you to alter the DTO before it's passed to the controller.
+ * This event is dispatched once the validation is done, this allows you to alter the DTO object.
  */
-class PostDtoMappingEvent extends Event
+class PostDtoValidationEvent extends Event
 {
 }
