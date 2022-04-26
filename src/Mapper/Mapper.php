@@ -7,28 +7,21 @@ use Artyum\RequestDtoMapperBundle\Event\PostDtoMappingEvent;
 use Artyum\RequestDtoMapperBundle\Event\PostDtoValidationEvent;
 use Artyum\RequestDtoMapperBundle\Event\PreDtoMappingEvent;
 use Artyum\RequestDtoMapperBundle\Event\PreDtoValidationEvent;
-use Artyum\RequestDtoMapperBundle\Exception\DtoDefinitionException;
-use Artyum\RequestDtoMapperBundle\Exception\DtoMappingException;
 use Artyum\RequestDtoMapperBundle\Exception\DtoValidationException;
 use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
-use Doctrine\Common\Annotations\AnnotationReader;
-use ReflectionClass;
-use ReflectionException;
+use LogicException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Throwable;
 
 class Mapper
 {
     public function __construct(
         private EventDispatcherInterface $eventDispatcher, private DenormalizerInterface $denormalizer,
-        private ValidatorInterface $validator
+        private ?ValidatorInterface $validator = null
     ) {
     }
 
@@ -51,6 +44,10 @@ class Mapper
 
         if (!$attribute->getValidation()) {
             return;
+        }
+
+        if (!$this->validator) {
+            throw new LogicException('You cannot validate the DTO if the "validator" component is not available. Try running "composer require symfony/validator".');
         }
 
         $this->eventDispatcher->dispatch(new PreDtoValidationEvent());

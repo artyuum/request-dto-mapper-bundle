@@ -16,7 +16,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             service(EventDispatcherInterface::class),
             service(DenormalizerInterface::class),
-            service(ValidatorInterface::class),
+            service(ValidatorInterface::class)->nullOnInvalid(),
         ])
 
         // Listeners
