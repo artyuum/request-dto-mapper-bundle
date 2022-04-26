@@ -24,6 +24,6 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             service(Mapper::class),
         ])
-        ->tag('kernel.event_listener', ['event' => KernelEvents::CONTROLLER_ARGUMENTS])
+        ->tag('kernel.event_listener', ['event' => KernelEvents::CONTROLLER_ARGUMENTS, 'priority' => -1])
     ;
 };
