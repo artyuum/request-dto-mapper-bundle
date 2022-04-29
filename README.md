@@ -69,13 +69,15 @@ class PostPayload {
 ```php
 use Artyum\RequestDtoMapperBundle\Attribute\Dto;
 
-class RegisterController extends AbstractController
+class PostController extends AbstractController
 {
-    #[Route('/register', name: 'register', methods: 'POST')]
-    #[Dto(subject: AccountPayload::class, source: JsonSource::class, validation: true)]
-    public function __invoke(AccountPayload $accountPayload): Response
+    #[Route('/posts', name: 'post.create', methods: 'POST')]
+    #[Dto(subject: PostPayload::class, source: JsonSource::class, validation: true)]
+    public function __invoke(PostPayload $postPayload): Response
     {
-		...
+		// at this stage, your DTO has automatically been mapped and validated (if enabled)
+		// and you can safely execute your controller knowing that the submitted content
+      	// matches your requirements (defined in your DTO).
     }
 }
 ```
