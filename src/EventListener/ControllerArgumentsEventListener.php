@@ -36,6 +36,7 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
     public function onKernelControllerArguments(ControllerArgumentsEvent $event)
     {
         $controller = $event->getController();
+        $request = $event->getRequest();
 
         if (is_array($controller)) {
             $class = new ReflectionClass($controller[0]);
@@ -54,6 +55,10 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
             $attribute = $attribute->newInstance();
             $subject = $this->getSubjectFromControllerArguments($attribute->getSubject(), $event->getArguments());
 
+            if ($attribute->getMethods() && !in_array($request->getMethod(), $attribute->getMethods())) {
+                continue;
+            }
+
             if (!$subject) {
                 throw new \LogicException(sprintf(
                     'The subject (%s) was not found in the controller arguments.',
@@ -61,10 +66,13 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
                 ));
             }
 
-            $this->mapper->map($event->getRequest(), $attribute, $subject);
+            $this->mapper->map($request, $attribute, $subject);
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public static function getSubscribedEvents()
     {
         return [
