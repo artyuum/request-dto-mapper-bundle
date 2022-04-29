@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- * This event is dispatched once the validation is done, this allows you to alter the DTO object.
+ * This event is dispatched once the validation is done, and it's the last event that is called before your controller is called (if the validation is enabled).
  */
 class PostDtoValidationEvent extends Event
 {
