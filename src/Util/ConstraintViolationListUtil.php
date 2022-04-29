@@ -1,13 +1,13 @@
 <?php
 
-namespace Artyum\RequestDtoMapperBundle\Helper;
+namespace Artyum\RequestDtoMapperBundle\Util;
 
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
- * A simple helper class that can be used to convert the passed violations into a key => value array.
+ * A simple utility class that can be used to convert the passed violations into a key => value array.
  */
-class ConstraintViolationListHelper
+class ConstraintViolationListUtil
 {
     /**
      * Gets the validator errors.
@@ -16,7 +16,7 @@ class ConstraintViolationListHelper
     {
         $errors = null;
 
-        // loops through all errors and stores only the needed informations to be displayed
+        // loops through all errors and stores only the needed information to be displayed
         foreach ($violations as $violation) {
             $errors[$violation->getPropertyPath()][] = $violation->getMessage();
         }
