@@ -75,9 +75,9 @@ class PostController extends AbstractController
     #[Dto(subject: PostPayload::class, source: JsonSource::class, validation: true)]
     public function __invoke(PostPayload $postPayload): Response
     {
-		// at this stage, your DTO has automatically been mapped and validated (if enabled)
-		// and you can safely execute your controller knowing that the submitted content
-      	// matches your requirements (defined in your DTO).
+        // at this stage, your DTO has automatically been mapped and validated (if enabled)
+        // and your controller can safely be executed knowing that the submitted content
+        // matches your requirements (defined in your DTO).
     }
 }
 ```
