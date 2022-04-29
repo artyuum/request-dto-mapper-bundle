@@ -1,52 +1,88 @@
 # Request DTO Mapper Bundle
 This bundle provides an easy way to automatically map the incoming request data to a DTO and optionally validate it.
 
+## Requirements
+- PHP ^8.0
+- Symfony ^5.0 or ^6.0
+
 ## Installation
 ```
 composer require artyuum/request-dto-mapper-bundle 
 ```
 
 ## Configuration
-This is the default configuration (`config/packages/artyuum_request_dto_mapper_bundle.yaml`):
 ```yml
-artyuum_request_dto_mapper_bundle:
-    enabled: true # whether to enable/disable the argument resolver
+# config/packages/artyuum_request_dto_mapper_bundle.yaml
+artyuum_request_dto_mapper:
+
+    # The configuration related to the validator.
+    validation:
+
+        # Whether to validate the DTO after mapping it.
+        enabled:              false
+
+        # The default validation groups to use when validating the DTO.
+        default_groups:       []
+
+        # Whether to throw an exception if the DTO validation failed (constraint violations).
+        throw_on_violation:   false
+
+    # The default source (FQCN) to use if the attribute does not specify any.
+    default_source:       ~
+
+    # The configuration related to the denormalizer.
+    denormalizer:
+
+        # The default denormalizer options to pass when mapping the request data to the DTO.
+        default_options:      []
 ```
 
 ## Usage
-This is a simple example of how to make a DTO that will be used by the bundle:
+This is a simple step-by-step example of how to make a DTO that will be used by the bundle.
+
+1. Create the DTO that represents the JSON content the user will send to your controller. 
 ```php
-/**
- * @Dto(methods={"POST"}, source="json", validationGroups={"create"})
- * @Dto(methods={"PATCH"}, source="json", validationGroups={"edit"})
- */
-class ArtistPayload implements DtoInterface {
+class PostPayload {
     /**
      * @Assert\Sequentially({
-     *     @Assert\NotBlank(groups={"create"}),
+     *     @Assert\NotBlank,
      *     @Assert\Type("string")
-     * }, groups={"create", "edit"})
+     * })
      *
-     * @var string|null should contain the artist's name
+     * @var string|null
      */
-    public $name = null;
+    public $title;
+    
+    /**
+     * @Assert\Sequentially({
+     *     @Assert\NotBlank,
+     *     @Assert\Type("string")
+     * })
+     *
+     * @var string|null
+     */
+    public $content;
 }
 ```
 
-Your DTOs **must** implement the [`DtoInterface`](/src/Mapper/DtoInterface.php) and define the request context using the `@Dto` annotation.
+2. Inject the DTO into your controller & configure it using the Dto PHP attribute.
+```php
+use Artyum\RequestDtoMapperBundle\Attribute\Dto;
 
-Here is the list of options used in the `@Dto` annotation:
-| name                 | type    | default | required | description                                                                                                       |
-|----------------------|---------|---------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `methods`            | array   | -       | **yes**  | The HTTP method(s) on which to apply the options below.                                                           |
-| `source`             | string  | -       | **yes**  | The source from where the data will be extracted from the request. (`json`, `query_strings` or `body_parameters`) |
-| `validation`         | boolean | *true*  | no       | Whether or not to validate the DTO before passing it to the controller.                                           |
-| `validationGroups`   | array   | *null*  | no       | The validation groups to be used when validating the DTO.                                                         |
+class RegisterController extends AbstractController
+{
+    #[Route('/register', name: 'register', methods: 'POST')]
+    #[Dto(subject: AccountPayload::class, source: JsonSource::class, validation: true)]
+    public function __invoke(AccountPayload $accountPayload): Response
+    {
+		...
+    }
+}
+```
+3. That's it!
 
 ## Events
-- **[PreDtoMappingEvent](/src/Event/PreDtoMappingEvent.php)** - disptached before the mapping is made, this allows you to alter the Serializer/Denormalizer options, or the Request object.
-- **[PreDtoValidationEvent](/src/Event/PreDtoValidationEvent.php)** - dispatched before the validation is made, this allows you to alter the DTO object (if the validation is enabled).
-- **[PostDtoMappingEvent](/src/Event/PostDtoMappingEvent.php)** - disptached at the very end of the process, this allows you to alter the DTO before it's passed to the controller.
-
-## Known limitations
-1. Doesn't work with DTOs that have dependencies. (e.g. injecting a class in the DTO's constructor) 
+- **[PreDtoMappingEvent](/src/Event/PreDtoMappingEvent.php)** - dispatched before the mapping is made, this allows you to alter the Request object for example.
+- **[PostDtoMappingEvent](/src/Event/PostDtoMappingEvent.php)** - dispatched once the mapping is done, and it's the last event that is called before your controller is called (if the validation is NOT enabled).
+- **[PreDtoValidationEvent](/src/Event/PreDtoValidationEvent.php)** - dispatched before the validation is made, this allows you to alter the DTO before it's being passed to the validator.
+- **[PostDtoMappingEvent](/src/Event/PostDtoMappingEvent.php)** - dispatched once the validation is done, and it's the last event that is called before your controller is called (if the validation is enabled).
