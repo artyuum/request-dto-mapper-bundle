@@ -7,11 +7,11 @@
         "symfony/serializer": "^5.0 || ^6.0",
         "symfony/http-kernel": "^5.0 || ^6.0",
         "symfony/config": "^5.0 || ^6.0",
-        "symfony/event-dispatcher": "^6.0",
-        "symfony/framework-bundle": "^6.0"
+        "symfony/event-dispatcher": "^5.0 || ^6.0",
+        "symfony/framework-bundle": "^5.0 || ^6.0"
     },
     "suggest": {
-        "symfony/validator": "Allows the validation of the DTO."
+        "symfony/validator": "For validating the DTO (if validation enabled)."
     },
     "license": "MIT",
     "authors": [
