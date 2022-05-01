@@ -7,6 +7,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
 return static function (ContainerConfigurator $container): void {
@@ -14,9 +15,12 @@ return static function (ContainerConfigurator $container): void {
         // Services
         ->set(Mapper::class)
         ->args([
+            param('denormalizer'),
+            param('validation'),
             service(EventDispatcherInterface::class),
             service(DenormalizerInterface::class),
             service(ValidatorInterface::class)->nullOnInvalid(),
+            param('default_source'),
         ])
 
         // Listeners

@@ -2,6 +2,7 @@
 
 namespace Artyum\RequestDtoMapperBundle\DependencyInjection;
 
+use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
@@ -16,5 +17,14 @@ class ArtyumRequestDtoMapperExtension extends Extension
     {
         $loader = new PhpFileLoader($container, new FileLocator(dirname(__DIR__) . '/Resources/config'));
         $loader->load('services.php');
+
+        $config = $this->processConfiguration(new Configuration(), $configs);
+
+
+        $container->getDefinition(Mapper::class)
+            ->setArgument(0, $config['denormalizer'])
+            ->setArgument(1, $config['validation'])
+            ->setArgument(5, $config['default_source'])
+        ;
     }
 }

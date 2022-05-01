@@ -10,8 +10,8 @@ use LogicException;
 class Dto
 {
     public function __construct(
-        private string $subject, private string $source, private array $methods = [], private array $options = [],
-        private bool $validation = false, private array $validationGroups = []
+        private string $subject, private string $source, private array $methods = [], private array $denormalizerOptions = [],
+        private bool $validate = false, private array $validationGroups = []
     ) {
         if (!class_implements($this->source, SourceInterface::class)) {
             throw new LogicException(sprintf(
@@ -27,28 +27,58 @@ class Dto
         return $this->subject;
     }
 
+    public function setSubject(string $subject): void
+    {
+        $this->subject = $subject;
+    }
+
     public function getSource(): string
     {
         return $this->source;
     }
 
-    public function getMethods(): ?array
+    public function setSource(string $source): void
+    {
+        $this->source = $source;
+    }
+
+    public function getMethods(): array
     {
         return $this->methods;
     }
 
-    public function getOptions(): array
+    public function setMethods(array $methods): void
     {
-        return $this->options;
+        $this->methods = $methods;
     }
 
-    public function getValidation(): bool
+    public function getDenormalizerOptions(): array
     {
-        return $this->validation;
+        return $this->denormalizerOptions;
+    }
+
+    public function setDenormalizerOptions(array $denormalizerOptions): void
+    {
+        $this->denormalizerOptions = $denormalizerOptions;
+    }
+
+    public function getValidate(): bool
+    {
+        return $this->validate;
+    }
+
+    public function setValidate(bool $validate): void
+    {
+        $this->validate = $validate;
     }
 
     public function getValidationGroups(): array
     {
         return $this->validationGroups;
+    }
+
+    public function setValidationGroups(array $validationGroups): void
+    {
+        $this->validationGroups = $validationGroups;
     }
 }

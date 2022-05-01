@@ -15,7 +15,19 @@ composer require artyuum/request-dto-mapper-bundle
 ## Configuration
 ```yml
 # config/packages/artyuum_request_dto_mapper_bundle.yaml
-artyuum_request_dto_mapper:
+artyum_request_dto_mapper:
+
+    # Used if the attribute does not specify any (must be a FQCN implementing "\Artyum\RequestDtoMapperBundle\Source\SourceInterface").
+    default_source:       ~
+
+    # The configuration related to the denormalizer.
+    denormalizer:
+
+        # Used when mapping the request data to the DTO if the attribute does not set any.
+        default_options:      []
+
+        # Used when mapping the request data to the DTO (merged with the values passed by the attribute or "default_options").
+        additional_options:   []
 
     # The configuration related to the validator.
     validation:
@@ -23,20 +35,14 @@ artyuum_request_dto_mapper:
         # Whether to validate the DTO after mapping it.
         enabled:              false
 
-        # The default validation groups to use when validating the DTO.
+        # Used when validating the DTO if the attribute does not set any.
         default_groups:       []
+
+        # Used when validating the DTO (merged with the values passed by the attribute or "default_groups").
+        additional_groups:    []
 
         # Whether to throw an exception if the DTO validation failed (constraint violations).
         throw_on_violation:   false
-
-    # The default source (FQCN) to use if the attribute does not specify any.
-    default_source:       ~
-
-    # The configuration related to the denormalizer.
-    denormalizer:
-
-        # The default denormalizer options to pass when mapping the request data to the DTO.
-        default_options:      []
 ```
 
 ## Usage
@@ -88,5 +94,5 @@ class PostController extends AbstractController
 ## Events
 - **[PreDtoMappingEvent](/src/Event/PreDtoMappingEvent.php)** - dispatched before the mapping is made, this allows you to alter the Request object for example.
 - **[PostDtoMappingEvent](/src/Event/PostDtoMappingEvent.php)** - dispatched once the mapping is done, and it's the last event that is called before your controller is called (if the validation is NOT enabled).
-- **[PreDtoValidationEvent](/src/Event/PreDtoValidationEvent.php)** - dispatched before the validation is made, this allows you to alter the DTO before it's being passed to the validator.
-- **[PostDtoMappingEvent](/src/Event/PostDtoMappingEvent.php)** - dispatched once the validation is done, and it's the last event that is called before your controller is called (if the validation is enabled).
+- **[PreDtoValidationEvent](/src/Event/PreDtoValidationEvent.php)** - dispatched before the validation is made, this allows you to alter the DTO before it's being passed to the validator (if the validation is enabled).
+- **[PostDtoValidationEvent](/src/Event/PostDtoValidationEvent.php)** - dispatched once the validation is done, and it's the last event that is called before your controller is called (if the validation is enabled).
