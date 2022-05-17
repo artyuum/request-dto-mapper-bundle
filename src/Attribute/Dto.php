@@ -11,7 +11,7 @@ class Dto
 {
     public function __construct(
         private string $subject, private string $source, private array $methods = [], private array $denormalizerOptions = [],
-        private bool $validate = false, private array $validationGroups = []
+        private ?bool $validate = null, private array $validationGroups = []
     ) {
         if (!class_implements($this->source, SourceInterface::class)) {
             throw new LogicException(sprintf(
@@ -62,12 +62,12 @@ class Dto
         $this->denormalizerOptions = $denormalizerOptions;
     }
 
-    public function getValidate(): bool
+    public function getValidate(): ?bool
     {
         return $this->validate;
     }
 
-    public function setValidate(bool $validate): void
+    public function setValidate(?bool $validate): void
     {
         $this->validate = $validate;
     }

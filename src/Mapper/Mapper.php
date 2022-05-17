@@ -58,6 +58,18 @@ class Mapper
     }
 
     /**
+     * Whether to validate the DTO.
+     */
+    private function canValidate(Dto $attribute): bool
+    {
+        if ($attribute->getValidate()) {
+            return true;
+        }
+
+        return $this->validationConfiguration['enabled'];
+    }
+
+    /**
      * Maps the request data to the DTO.
      *
      * @throws ExceptionInterface
@@ -95,7 +107,7 @@ class Mapper
 
         $this->eventDispatcher->dispatch(new PostDtoMappingEvent());
 
-        if (!$attribute->getValidate() || !$this->validationConfiguration['enabled']) {
+        if (!$this->canValidate($attribute)) {
             return;
         }
 
