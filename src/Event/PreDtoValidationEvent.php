@@ -2,9 +2,6 @@
 
 namespace Artyum\RequestDtoMapperBundle\Event;
 
-use Artyum\RequestDtoMapperBundle\Attribute\Dto;
-use Artyum\RequestDtoMapperBundle\Mapper\DtoInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
