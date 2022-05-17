@@ -47,7 +47,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
                     ->booleanNode('throw_on_violation')
                         ->info('Whether to throw an exception if the DTO validation failed (constraint violations).')
-                        ->defaultFalse()
+                        ->defaultTrue()
                     ->end()
                 ->end()
             ->end()
