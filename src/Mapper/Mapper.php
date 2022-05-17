@@ -111,8 +111,12 @@ class Mapper
 
         $errors = $this->validator->validate($subject, null, $validationGroups);
 
-        if (count($errors) && $this->validationConfiguration['throw_on_violation']) {
-            throw new DtoValidationException($errors);
+        if ($errors->count()) {
+            $request->attributes->set('_constraint_violations', $errors);
+
+            if ($this->validationConfiguration['throw_on_violation']) {
+                throw new DtoValidationException($errors);
+            }
         }
 
         $this->eventDispatcher->dispatch(new PostDtoValidationEvent());
