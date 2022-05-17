@@ -7,7 +7,9 @@ use Artyum\RequestDtoMapperBundle\Event\PostDtoMappingEvent;
 use Artyum\RequestDtoMapperBundle\Event\PostDtoValidationEvent;
 use Artyum\RequestDtoMapperBundle\Event\PreDtoMappingEvent;
 use Artyum\RequestDtoMapperBundle\Event\PreDtoValidationEvent;
+use Artyum\RequestDtoMapperBundle\Exception\DtoMappingException;
 use Artyum\RequestDtoMapperBundle\Exception\DtoValidationException;
+use Artyum\RequestDtoMapperBundle\Exception\SourceExtractionException;
 use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
 use LogicException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -16,6 +18,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Throwable;
 
 class Mapper
 {
@@ -59,6 +62,8 @@ class Mapper
      *
      * @throws ExceptionInterface
      * @throws DtoValidationException
+     * @throws DtoMappingException
+     * @throws SourceExtractionException
      */
     public function map(Request $request, Dto $attribute, object $subject): void
     {
@@ -73,10 +78,20 @@ class Mapper
         /** @var SourceInterface $source */
         $source = new ($source)();
 
+        try {
+            $data = $source->extract($request);
+        } catch (Throwable $throwable) {
+            throw new SourceExtractionException(previous: $throwable);
+        }
+
         $denormalizerOptions = $this->getDenormalizerOptions($attribute->getDenormalizerOptions());
         $denormalizerOptions[AbstractNormalizer::OBJECT_TO_POPULATE] = $subject;
 
-        $this->denormalizer->denormalize($source->extract($request), $attribute->getSubject(), null, $denormalizerOptions);
+        try {
+            $this->denormalizer->denormalize($data, $attribute->getSubject(), null, $denormalizerOptions);
+        } catch (Throwable $throwable) {
+            throw new DtoMappingException(previous: $throwable);
+        }
 
         $this->eventDispatcher->dispatch(new PostDtoMappingEvent());
 
@@ -85,7 +100,9 @@ class Mapper
         }
 
         if (!$this->validator) {
-            throw new LogicException('You cannot validate the DTO if the "validator" component is not available. Try running "composer require symfony/validator".');
+            throw new LogicException(
+                'You cannot validate the DTO if the "validator" component is not available. Try running "composer require symfony/validator".'
+            );
         }
 
         $this->eventDispatcher->dispatch(new PreDtoValidationEvent());
