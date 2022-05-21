@@ -79,7 +79,7 @@ class Mapper
      */
     public function map(Request $request, Dto $attribute, object $subject): void
     {
-        $this->eventDispatcher->dispatch(new PreDtoMappingEvent());
+        $this->eventDispatcher->dispatch(new PreDtoMappingEvent($request, $attribute, $subject));
 
         $source = $attribute->getSource() ?? $this->defaultSourceConfiguration;
 
@@ -105,7 +105,7 @@ class Mapper
             throw new DtoMappingException(previous: $throwable);
         }
 
-        $this->eventDispatcher->dispatch(new PostDtoMappingEvent());
+        $this->eventDispatcher->dispatch(new PostDtoMappingEvent($request, $attribute, $subject));
 
         if (!$this->canValidate($attribute)) {
             return;
@@ -117,7 +117,7 @@ class Mapper
             );
         }
 
-        $this->eventDispatcher->dispatch(new PreDtoValidationEvent());
+        $this->eventDispatcher->dispatch(new PreDtoValidationEvent($request, $attribute, $subject));
 
         $validationGroups = $this->getValidationGroups($attribute->getValidationGroups());
 
@@ -131,6 +131,6 @@ class Mapper
             }
         }
 
-        $this->eventDispatcher->dispatch(new PostDtoValidationEvent());
+        $this->eventDispatcher->dispatch(new PostDtoValidationEvent($request, $attribute, $subject, $errors));
     }
 }
