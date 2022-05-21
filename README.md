@@ -20,7 +20,7 @@ artyum_request_dto_mapper:
     # Used if the attribute does not specify any (must be a FQCN implementing "\Artyum\RequestDtoMapperBundle\Source\SourceInterface").
     default_source:       ~
 
-    # The configuration related to the denormalizer.
+    # The configuration related to the denormalizer (https://symfony.com/doc/current/components/serializer.html).
     denormalizer:
 
         # Used when mapping the request data to the DTO if the attribute does not set any.
@@ -29,7 +29,7 @@ artyum_request_dto_mapper:
         # Used when mapping the request data to the DTO (merged with the values passed by the attribute or "default_options").
         additional_options:   []
 
-    # The configuration related to the validator.
+    # The configuration related to the validator (https://symfony.com/doc/current/validation.html).
     validation:
 
         # Whether to validate the DTO after mapping it.
@@ -42,13 +42,13 @@ artyum_request_dto_mapper:
         additional_groups:    []
 
         # Whether to throw an exception if the DTO validation failed (constraint violations).
-        throw_on_violation:   false
+        throw_on_violation:   true
 ```
 
 ## Usage
 This is a simple step-by-step example of how to make a DTO that will be used by the bundle.
 
-1. Create the DTO that represents the JSON content the user will send to your controller. 
+1. Create the DTO that represents the structure of the content the user will send to your controller. 
 ```php
 class PostPayload {
     /**
@@ -80,12 +80,12 @@ use Artyum\RequestDtoMapperBundle\Attribute\Dto;
 class PostController extends AbstractController
 {
     #[Route('/posts', name: 'post.create', methods: 'POST')]
-    #[Dto(subject: PostPayload::class, source: JsonSource::class, validation: true)]
+    #[Dto(subject: PostPayload::class, source: JsonSource::class, validate: true)]
     public function __invoke(PostPayload $postPayload): Response
     {
-        // at this stage, your DTO has automatically been mapped and validated (if enabled)
+        // at this stage, your DTO (the PostPayload in this example) has automatically been mapped and validated
         // and your controller can safely be executed knowing that the submitted content
-        // matches your requirements (defined in your DTO).
+        // matches your requirements (defined in your DTO through the validator constraints).
     }
 }
 ```
