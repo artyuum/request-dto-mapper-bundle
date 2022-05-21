@@ -62,8 +62,8 @@ class Mapper
      */
     private function canValidate(Dto $attribute): bool
     {
-        if ($attribute->getValidate()) {
-            return true;
+        if (is_bool($attribute->getValidate())) {
+            return $attribute->getValidate();
         }
 
         return $this->validationConfiguration['enabled'];

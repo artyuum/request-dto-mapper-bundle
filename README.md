@@ -93,6 +93,6 @@ class PostController extends AbstractController
 
 ## Events
 - **[PreDtoMappingEvent](/src/Event/PreDtoMappingEvent.php)** - dispatched before the mapping is made, this allows you to alter the Request object for example.
-- **[PostDtoMappingEvent](/src/Event/PostDtoMappingEvent.php)** - dispatched once the mapping is done, and it's the last event that is called before your controller is called (if the validation is NOT enabled).
+- **[PostDtoMappingEvent](/src/Event/PostDtoMappingEvent.php)** - dispatched once the mapping is done, and it's the last event that is called before your controller is called (if the validation is not enabled).
 - **[PreDtoValidationEvent](/src/Event/PreDtoValidationEvent.php)** - dispatched before the validation is made, this allows you to alter the DTO before it's being passed to the validator (if the validation is enabled).
 - **[PostDtoValidationEvent](/src/Event/PostDtoValidationEvent.php)** - dispatched once the validation is done, and it's the last event that is called before your controller is called (if the validation is enabled).
