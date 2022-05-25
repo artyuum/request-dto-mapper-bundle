@@ -14,9 +14,11 @@ use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
 use LogicException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Throwable;
 
@@ -24,8 +26,9 @@ class Mapper
 {
     public function __construct(
         private array $denormalizerConfiguration, private array $validationConfiguration,
-        private EventDispatcherInterface $eventDispatcher, private DenormalizerInterface $denormalizer,
-        private ?ValidatorInterface $validator = null, private ?string $defaultSourceConfiguration = null
+        private RequestStack $requestStack, private EventDispatcherInterface $eventDispatcher,
+        private SerializerInterface $serializer, private ?ValidatorInterface $validator = null,
+        private ?string $defaultSourceConfiguration = null
     ) {
     }
 
@@ -70,15 +73,51 @@ class Mapper
     }
 
     /**
+     * Validates the subject (already mapped DTO).
+     *
+     * @throws DtoValidationException
+     */
+    public function validate(Dto $attribute, object $subject): void
+    {
+        if (!$this->canValidate($attribute)) {
+            return;
+        }
+
+        if (!$this->validator) {
+            throw new LogicException(
+                'You cannot validate the DTO if the "validator" component is not available. Try running "composer require symfony/validator".'
+            );
+        }
+
+        $request = $this->requestStack->getMainRequest();
+
+        $this->eventDispatcher->dispatch(new PreDtoValidationEvent($request, $attribute, $subject));
+
+        $validationGroups = $this->getValidationGroups($attribute->getValidationGroups());
+
+        $errors = $this->validator->validate($subject, null, $validationGroups);
+
+        if ($errors->count()) {
+            $request->attributes->set('_constraint_violations', $errors);
+
+            if ($this->validationConfiguration['throw_on_violation']) {
+                throw new DtoValidationException($errors);
+            }
+        }
+
+        $this->eventDispatcher->dispatch(new PostDtoValidationEvent($request, $attribute, $subject, $errors));
+    }
+
+    /**
      * Maps the request data to the DTO.
      *
-     * @throws ExceptionInterface
-     * @throws DtoValidationException
      * @throws DtoMappingException
      * @throws SourceExtractionException
      */
-    public function map(Request $request, Dto $attribute, object $subject): void
+    public function map(Dto $attribute, object $subject): void
     {
+        $request = $this->requestStack->getMainRequest();
+
         $this->eventDispatcher->dispatch(new PreDtoMappingEvent($request, $attribute, $subject));
 
         $source = $attribute->getSource() ?? $this->defaultSourceConfiguration;
@@ -100,37 +139,11 @@ class Mapper
         $denormalizerOptions[AbstractNormalizer::OBJECT_TO_POPULATE] = $subject;
 
         try {
-            $this->denormalizer->denormalize($data, $attribute->getSubject(), null, $denormalizerOptions);
+            $this->serializer->denormalize($data, $attribute->getSubject(), null, $denormalizerOptions);
         } catch (Throwable $throwable) {
             throw new DtoMappingException(previous: $throwable);
         }
 
         $this->eventDispatcher->dispatch(new PostDtoMappingEvent($request, $attribute, $subject));
-
-        if (!$this->canValidate($attribute)) {
-            return;
-        }
-
-        if (!$this->validator) {
-            throw new LogicException(
-                'You cannot validate the DTO if the "validator" component is not available. Try running "composer require symfony/validator".'
-            );
-        }
-
-        $this->eventDispatcher->dispatch(new PreDtoValidationEvent($request, $attribute, $subject));
-
-        $validationGroups = $this->getValidationGroups($attribute->getValidationGroups());
-
-        $errors = $this->validator->validate($subject, null, $validationGroups);
-
-        if ($errors->count()) {
-            $request->attributes->set('_constraint_violations', $errors);
-
-            if ($this->validationConfiguration['throw_on_violation']) {
-                throw new DtoValidationException($errors);
-            }
-        }
-
-        $this->eventDispatcher->dispatch(new PostDtoValidationEvent($request, $attribute, $subject, $errors));
     }
 }

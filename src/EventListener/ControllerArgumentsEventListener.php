@@ -4,7 +4,7 @@ namespace Artyum\RequestDtoMapperBundle\EventListener;
 
 use Artyum\RequestDtoMapperBundle\Attribute\Dto;
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
-use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
+use LogicException;
 use ReflectionClass;
 use ReflectionException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -18,7 +18,7 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
     {
     }
 
-    public function getSubjectFromControllerArguments(string $subject, array $arguments): ?object
+    private function getSubjectFromControllerArguments(string $subject, array $arguments): ?object
     {
         foreach ($arguments as $argument) {
             if ($argument instanceof $subject) {
@@ -60,20 +60,21 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
             }
 
             if (!$subject) {
-                throw new \LogicException(sprintf(
+                throw new LogicException(sprintf(
                     'The subject (%s) was not found in the controller arguments.',
                     $attribute->getSubject()
                 ));
             }
 
-            $this->mapper->map($request, $attribute, $subject);
+            $this->mapper->map($attribute, $subject);
+            $this->mapper->validate($attribute, $subject);
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             KernelEvents::CONTROLLER_ARGUMENTS => 'onKernelControllerArguments'

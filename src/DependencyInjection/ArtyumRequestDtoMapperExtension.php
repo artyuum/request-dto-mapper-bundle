@@ -24,7 +24,7 @@ class ArtyumRequestDtoMapperExtension extends Extension
         $container->getDefinition(Mapper::class)
             ->setArgument(0, $config['denormalizer'])
             ->setArgument(1, $config['validation'])
-            ->setArgument(5, $config['default_source'])
+            ->setArgument(6, $config['default_source'])
         ;
     }
 }

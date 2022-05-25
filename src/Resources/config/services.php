@@ -4,6 +4,7 @@ use Artyum\RequestDtoMapperBundle\EventListener\ControllerArgumentsEventListener
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -17,6 +18,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             param('denormalizer'),
             param('validation'),
+            service(RequestStack::class),
             service(EventDispatcherInterface::class),
             service(DenormalizerInterface::class),
             service(ValidatorInterface::class)->nullOnInvalid(),
