@@ -16,14 +16,9 @@ use Tests\Mapper\Fixture\SourceThrowingException;
 
 class MapperTest extends TestCase
 {
-    private Request $request;
+    private Mapper $mapper;
 
     protected function setUp(): void
-    {
-        $this->request = new Request();
-    }
-
-    private function getMapper(): Mapper
     {
         $requestStackMock = $this->createMock(RequestStack::class);
         $requestStackMock->method('getMainRequest')->willReturn(new Request());
@@ -32,15 +27,13 @@ class MapperTest extends TestCase
         $validatorMock = $this->getMockBuilder(TraceableValidator::class)->disableOriginalConstructor()->getMock();
         $serializerMock = $this->getMockBuilder(SerializerInterface::class)->getMock();
 
-        return new Mapper([], [], $requestStackMock, $eventDispatcherMock, $serializerMock, $validatorMock);
+        $this>$this->mapper = new Mapper([], [], $requestStackMock, $eventDispatcherMock, $serializerMock, $validatorMock);
     }
 
     public function testExceptionWhenExtractingSourceData()
     {
         $this->expectException(SourceExtractionException::class);
 
-        $mapper = $this->getMapper();
-
-        $mapper->map(new Dto(FooDto::class, SourceThrowingException::class), new FooDto());
+        $this->mapper->map(new Dto(FooDto::class, SourceThrowingException::class), new FooDto());
     }
 }
