@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class JsonSourceTest extends TestCase
 {
-    public function testExtract(): void
+    public function testRequestDataExtraction(): void
     {
         $expectedData = [
             'key' => 'value'

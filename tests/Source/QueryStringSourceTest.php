@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class QueryStringSourceTest extends TestCase
 {
-    public function testExtract(): void
+    public function testRequestDataExtraction(): void
     {
         $expectedData = [
             'key' => 'value'

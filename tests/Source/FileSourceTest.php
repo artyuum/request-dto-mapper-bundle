@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class FileSourceTest extends TestCase
 {
-    public function testExtract(): void
+    public function testRequestDataExtraction(): void
     {
         $expectedData = [
             new UploadedFile(path: __DIR__.'/Fixture/sample.txt', originalName: 'sample', test: true)
