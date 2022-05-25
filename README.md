@@ -50,7 +50,7 @@ This is a simple step-by-step example of how to make a DTO that will be used by 
 
 1. Create the DTO that represents the structure of the content the user will send to your controller. 
 ```php
-class PostPayload {
+class PostDto {
     /**
      * @Assert\Sequentially({
      *     @Assert\NotBlank,
@@ -80,10 +80,10 @@ use Artyum\RequestDtoMapperBundle\Attribute\Dto;
 class PostController extends AbstractController
 {
     #[Route('/posts', name: 'post.create', methods: 'POST')]
-    #[Dto(subject: PostPayload::class, source: JsonSource::class, validate: true)]
-    public function __invoke(PostPayload $postPayload): Response
+    #[Dto(subject: PostDto::class, source: JsonSource::class, validate: true)]
+    public function __invoke(PostDto $postDto): Response
     {
-        // at this stage, your DTO (the PostPayload in this example) has automatically been mapped and validated
+        // at this stage, your DTO (the PostDto in this example) has automatically been mapped and validated
         // and your controller can safely be executed knowing that the submitted content
         // matches your requirements (defined in your DTO through the validator constraints).
     }
@@ -91,8 +91,40 @@ class PostController extends AbstractController
 ```
 3. That's it!
 
+## Source
+The "source" is the class that implements the `SourceInterface` and it's called by the mapper when getting the data from the request.
+
+The bundle already comes with 5 built-in sources that should meet most of your use-cases:
+- [BodyParameterSource](/src/Source/BodyParameterSource.php) (extracts the data from `$request->request->all()`)
+- [FileSource](/src/Source/FileSource.php) (extracts the data from `$request->files->all()`)
+- [FormSource](/src/Source/FormSource.php) (extracts & merges the data from `$request->request->all()` and `$request->files->all()`)
+- [JsonSource](/src/Source/JsonSource.php) (extracts the data from `$request->toArray()`)
+- [QueryStringSource](/src/Source/QueryStringSource.php) (extracts the data from `$request->query->all()`)
+
+If these built-in sources don't meet your needs, you can implement your own source like this:
+```php
+use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
+use Symfony\Component\HttpFoundation\Request;
+
+class CustomSource extends SourceInterface
+{
+    public function extract(Request $request): array
+    {
+        // custom extraction logic here 
+    }
+}
+```
+Then pass it to the `Dto` attribute like this:
+
+```php
+...
+#[Dto(subject: PostDto::class, source: CustomSource::class)]
+...
+```
+
+
 ## Events
-- **[PreDtoMappingEvent](/src/Event/PreDtoMappingEvent.php)** - dispatched before the mapping is made, this allows you to alter the Request object for example.
-- **[PostDtoMappingEvent](/src/Event/PostDtoMappingEvent.php)** - dispatched once the mapping is done, and it's the last event that is called before your controller is called (if the validation is not enabled).
-- **[PreDtoValidationEvent](/src/Event/PreDtoValidationEvent.php)** - dispatched before the validation is made, this allows you to alter the DTO before it's being passed to the validator (if the validation is enabled).
-- **[PostDtoValidationEvent](/src/Event/PostDtoValidationEvent.php)** - dispatched once the validation is done, and it's the last event that is called before your controller is called (if the validation is enabled).
+- [PreDtoMappingEvent](/src/Event/PreDtoMappingEvent.php) - dispatched before the mapping is made.
+- [PostDtoMappingEvent](/src/Event/PostDtoMappingEvent.php) - dispatched once the mapping is made.
+- [PreDtoValidationEvent](/src/Event/PreDtoValidationEvent.php) - dispatched before the validation is made (if the validation is enabled).
+- [PostDtoValidationEvent](/src/Event/PostDtoValidationEvent.php) - dispatched once the validation is made (if the validation is enabled).
