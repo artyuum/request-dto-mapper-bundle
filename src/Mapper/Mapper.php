@@ -126,6 +126,14 @@ class Mapper
             throw new LogicException('You must set a source on the attribute or in the configuration file.');
         }
 
+        if (!class_implements($source, SourceInterface::class)) {
+            throw new LogicException(sprintf(
+                'The passed source "%s" must implement "%s".',
+                $source,
+                SourceInterface::class,
+            ));
+        }
+
         /** @var SourceInterface $source */
         $source = new ($source)();
 

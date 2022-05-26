@@ -10,16 +10,9 @@ use LogicException;
 class Dto
 {
     public function __construct(
-        private string $subject, private string $source, private array $methods = [], private array $denormalizerOptions = [],
+        private string $subject, private ?string $source = null, private array $methods = [], private array $denormalizerOptions = [],
         private ?bool $validate = null, private array $validationGroups = []
     ) {
-        if (!class_implements($this->source, SourceInterface::class)) {
-            throw new LogicException(sprintf(
-                'The passed source "%s" must implement "%s".',
-                $this->source,
-                SourceInterface::class,
-            ));
-        }
     }
 
     public function getSubject(): string
@@ -32,12 +25,12 @@ class Dto
         $this->subject = $subject;
     }
 
-    public function getSource(): string
+    public function getSource(): ?string
     {
         return $this->source;
     }
 
-    public function setSource(string $source): void
+    public function setSource(?string $source): void
     {
         $this->source = $source;
     }
