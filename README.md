@@ -1,5 +1,5 @@
 # Request DTO Mapper Bundle
-![screenshot](https://user-images.githubusercontent.com/17199757/165998036-bb67d1af-f756-47fe-b9b4-f63b132c7c6f.png)
+<img width="920" alt="preview" src="https://user-images.githubusercontent.com/17199757/170860717-509c0d12-0810-4d8b-af84-1991c099f57b.png">
 
 This bundle provides an easy way to automatically map the incoming request data to a DTO and optionally validate it.
 
