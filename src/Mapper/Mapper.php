@@ -130,14 +130,14 @@ class Mapper
             throw new LogicException('You must set a source either on the attribute or in the configuration file.');
         }
 
-        if ($this->sourceLocator->has($source)) {
+        if (!$this->sourceLocator->has($source)) {
             throw new LogicException('Unable to the find the passed source in the container. Make sure it\'s tagged as "artyum_request_dto_mapper.source".');
         }
 
         /** @var SourceInterface $sourceInstance */
         $sourceInstance = $this->sourceLocator->get($source);
 
-        if (!($sourceInstance instanceof SourceInterface::class)) {
+        if (!($sourceInstance instanceof (SourceInterface::class))) {
             throw new LogicException(sprintf(
                 'The passed source "%s" must implement "%s".',
                 $source,
