@@ -76,15 +76,15 @@ class PostDto {
 2. Inject the DTO into your controller & configure it using the Dto PHP attribute.
 ```php
 use Artyum\RequestDtoMapperBundle\Attribute\Dto;
+use Artyum\RequestDtoMapperBundle\Source\JsonSource;
 
 class PostController extends AbstractController
 {
-    #[Route('/posts', name: 'post.create', methods: 'POST')]
     #[Dto(subject: PostDto::class, source: JsonSource::class, validate: true)]
     public function __invoke(PostDto $postDto): Response
     {
-        // at this stage, your DTO (the PostDto in this example) has automatically been mapped and validated
-        // and your controller can safely be executed knowing that the submitted content
+        // At this stage, your DTO has automatically been mapped and validated.
+        // Your controller can safely be executed knowing that the submitted content
         // matches your requirements (defined in your DTO through the validator constraints).
     }
 }
