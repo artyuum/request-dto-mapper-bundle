@@ -3,12 +3,18 @@
 namespace Tests\Source;
 
 use Artyum\RequestDtoMapperBundle\Source\FileSource;
+use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 
 class FileSourceTest extends TestCase
 {
+    public function testInterface(): void
+    {
+        self::assertInstanceOf(SourceInterface::class, new FileSource());
+    }
+
     public function testRequestDataExtraction(): void
     {
         $expectedData = [

@@ -3,11 +3,17 @@
 namespace Tests\Source;
 
 use Artyum\RequestDtoMapperBundle\Source\QueryStringSource;
+use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
 class QueryStringSourceTest extends TestCase
 {
+    public function testInterface(): void
+    {
+        self::assertInstanceOf(SourceInterface::class, new QueryStringSource());
+    }
+
     public function testRequestDataExtraction(): void
     {
         $expectedData = [
