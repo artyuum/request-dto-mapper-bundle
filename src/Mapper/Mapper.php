@@ -12,6 +12,9 @@ use Artyum\RequestDtoMapperBundle\Exception\DtoValidationException;
 use Artyum\RequestDtoMapperBundle\Exception\SourceExtractionException;
 use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
 use LogicException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -23,24 +26,10 @@ class Mapper
 {
     public function __construct(
         private array $denormalizerConfiguration, private array $validationConfiguration,
-        private iterable $sources, private RequestStack $requestStack, private EventDispatcherInterface $eventDispatcher,
-        private DenormalizerInterface $denormalizer, private ?ValidatorInterface $validator = null,
-        private ?string $defaultSourceConfiguration = null
+        private ServiceLocator $sourceLocator, private RequestStack $requestStack,
+        private EventDispatcherInterface $eventDispatcher, private DenormalizerInterface $denormalizer,
+        private ?ValidatorInterface $validator = null,private ?string $defaultSourceConfiguration = null
     ) {
-    }
-
-    private function getSourceInstance(string $fqcn): SourceInterface
-    {
-        foreach ($this->sources as $source) {
-            if ($source instanceof $fqcn) {
-                return $source;
-            }
-        }
-
-        throw new LogicException(sprintf(
-            'Unable to find the passed source instance "%s" in the registered sources instance.',
-            $fqcn
-        ));
     }
 
     /**
@@ -122,8 +111,12 @@ class Mapper
     /**
      * Maps the request data to the DTO.
      *
+     * @param Dto $attribute
+     * @param object $subject
      * @throws DtoMappingException
      * @throws SourceExtractionException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function map(Dto $attribute, object $subject): void
     {
@@ -134,10 +127,17 @@ class Mapper
         $source = $attribute->getSource() ?? $this->defaultSourceConfiguration;
 
         if (!$source) {
-            throw new LogicException('You must set a source on the attribute or in the configuration file.');
+            throw new LogicException('You must set a source either on the attribute or in the configuration file.');
         }
 
-        if (!class_implements($source, SourceInterface::class)) {
+        if ($this->sourceLocator->has($source)) {
+            throw new LogicException('Unable to the find the passed source in the container. Make sure it\'s tagged as "artyum_request_dto_mapper.source".');
+        }
+
+        /** @var SourceInterface $sourceInstance */
+        $sourceInstance = $this->sourceLocator->get($source);
+
+        if (!($sourceInstance instanceof SourceInterface::class)) {
             throw new LogicException(sprintf(
                 'The passed source "%s" must implement "%s".',
                 $source,
@@ -145,10 +145,8 @@ class Mapper
             ));
         }
 
-        $source = $this->getSourceInstance($source);
-
         try {
-            $data = $source->extract($request);
+            $data = $sourceInstance->extract($request);
         } catch (Throwable $throwable) {
             throw new SourceExtractionException(previous: $throwable);
         }

@@ -15,7 +15,7 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
 return static function (ContainerConfigurator $container): void {
     $container->services()
@@ -31,7 +31,7 @@ return static function (ContainerConfigurator $container): void {
             ->args([
                 param('denormalizer'),
                 param('validation'),
-                tagged_iterator('artyum_request_dto_mapper.source'),
+                tagged_locator('artyum_request_dto_mapper.source'),
                 service(RequestStack::class),
                 service(EventDispatcherInterface::class),
                 service(DenormalizerInterface::class),
