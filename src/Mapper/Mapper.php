@@ -13,12 +13,9 @@ use Artyum\RequestDtoMapperBundle\Exception\SourceExtractionException;
 use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
 use LogicException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Throwable;
 
@@ -26,10 +23,24 @@ class Mapper
 {
     public function __construct(
         private array $denormalizerConfiguration, private array $validationConfiguration,
-        private RequestStack $requestStack, private EventDispatcherInterface $eventDispatcher,
-        private SerializerInterface $serializer, private ?ValidatorInterface $validator = null,
+        private iterable $sources, private RequestStack $requestStack, private EventDispatcherInterface $eventDispatcher,
+        private DenormalizerInterface $denormalizer, private ?ValidatorInterface $validator = null,
         private ?string $defaultSourceConfiguration = null
     ) {
+    }
+
+    private function getSourceInstance(string $fqcn): SourceInterface
+    {
+        foreach ($this->sources as $source) {
+            if ($source instanceof $fqcn) {
+                return $source;
+            }
+        }
+
+        throw new LogicException(sprintf(
+            'Unable to find the passed source instance "%s" in the registered sources instance.',
+            $fqcn
+        ));
     }
 
     /**
@@ -134,8 +145,7 @@ class Mapper
             ));
         }
 
-        /** @var SourceInterface $source */
-        $source = new ($source)();
+        $source = $this->getSourceInstance($source);
 
         try {
             $data = $source->extract($request);
@@ -147,7 +157,7 @@ class Mapper
         $denormalizerOptions[AbstractNormalizer::OBJECT_TO_POPULATE] = $subject;
 
         try {
-            $this->serializer->denormalize($data, $attribute->getSubject(), null, $denormalizerOptions);
+            $this->denormalizer->denormalize($data, $attribute->getSubject(), null, $denormalizerOptions);
         } catch (Throwable $throwable) {
             throw new DtoMappingException(previous: $throwable);
         }
