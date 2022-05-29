@@ -106,8 +106,12 @@ If these built-in sources don't meet your needs, you can implement your own sour
 use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-class CustomSource extends SourceInterface
+class CustomSource implements SourceInterface
 {
+    public function __construct() {
+        // you can optionally inject dependencies
+    }
+
     public function extract(Request $request): array
     {
         // custom extraction logic here 
@@ -121,7 +125,10 @@ Then pass it to the `Dto` attribute like this:
 #[Dto(subject: PostDto::class, source: CustomSource::class)]
 ...
 ```
+**Note:** All classes implementing the `SourceInterface` are automatically tagged under "artyum_request_dto_mapper.source". 
+This is needed by the mapper in order to retrieve the needed source class instance from the container.
 
+If you disabled "autoconfigure" option, you will need to explicitly tag your custom source in your application. 
 
 ## Events
 - [PreDtoMappingEvent](/src/Event/PreDtoMappingEvent.php) - dispatched before the mapping is made.
