@@ -24,7 +24,9 @@ class ArtyumRequestDtoMapperExtension extends Extension
             ->addTag('artyum_request_dto_mapper.source')
         ;
 
-        $config = $this->processConfiguration(new Configuration(), $configs);
+        $configuration = $this->getConfiguration($configs, $container);
+
+        $config = $this->processConfiguration($configuration, $configs);
 
         $container->getDefinition(Mapper::class)
             ->setArgument(0, $config['denormalizer'])
