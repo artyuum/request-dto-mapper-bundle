@@ -11,7 +11,7 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class PreDtoMappingEvent extends Event
 {
-    public function __construct(private Request $request, private Dto $attribute, private object $subject)
+    public function __construct(private Request $request, private Dto $attribute, private object $target)
     {
     }
 
@@ -25,8 +25,8 @@ class PreDtoMappingEvent extends Event
         return $this->attribute;
     }
 
-    public function getSubject(): object
+    public function getTarget(): object
     {
-        return $this->subject;
+        return $this->target;
     }
 }

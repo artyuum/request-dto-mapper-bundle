@@ -13,7 +13,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 class PostDtoValidationEvent extends Event
 {
     public function __construct(
-        private Request $request, private Dto $attribute, private object $subject,
+        private Request                          $request, private Dto $attribute, private object $target,
         private ConstraintViolationListInterface $errors
     ) {
     }
@@ -28,9 +28,9 @@ class PostDtoValidationEvent extends Event
         return $this->attribute;
     }
 
-    public function getSubject(): object
+    public function getTarget(): object
     {
-        return $this->subject;
+        return $this->target;
     }
 
     public function getErrors(): ConstraintViolationListInterface
