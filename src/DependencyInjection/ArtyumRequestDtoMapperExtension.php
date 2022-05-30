@@ -7,14 +7,14 @@ use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
-class ArtyumRequestDtoMapperExtension extends Extension
+class ArtyumRequestDtoMapperExtension extends ConfigurableExtension
 {
     /**
      * {@inheritdoc}
      */
-    public function load(array $configs, ContainerBuilder $container): void
+    protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $loader = new PhpFileLoader($container, new FileLocator(dirname(__DIR__) . '/Resources/config'));
         $loader->load('services.php');
@@ -24,14 +24,10 @@ class ArtyumRequestDtoMapperExtension extends Extension
             ->addTag('artyum_request_dto_mapper.source')
         ;
 
-        $configuration = $this->getConfiguration($configs, $container);
-
-        $config = $this->processConfiguration($configuration, $configs);
-
         $container->getDefinition(Mapper::class)
-            ->setArgument(0, $config['denormalizer'])
-            ->setArgument(1, $config['validation'])
-            ->setArgument(7, $config['default_source'])
+            ->replaceArgument(0, $mergedConfig['denormalizer'])
+            ->replaceArgument(1, $mergedConfig['validation'])
+            ->replaceArgument(7, $mergedConfig['default_source'])
         ;
     }
 }
