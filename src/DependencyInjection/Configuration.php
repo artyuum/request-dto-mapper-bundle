@@ -28,7 +28,6 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->arrayNode('default_options')
                             ->info('Used when mapping the request data to the DTO if the attribute does not set any.')
-                            ->addDefaultsIfNotSet()
                             ->prototype('scalar')->end()
                         ->end()
                         ->arrayNode('additional_options')
