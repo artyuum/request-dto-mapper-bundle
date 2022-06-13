@@ -11,7 +11,7 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class PostDtoMappingEvent extends Event
 {
-    public function __construct(private Request $request, private Dto $attribute, private object $target)
+    public function __construct(private Request $request, private Dto $attribute, private object $subject)
     {
     }
 
@@ -25,8 +25,8 @@ class PostDtoMappingEvent extends Event
         return $this->attribute;
     }
 
-    public function getTarget(): object
+    public function getSubject(): object
     {
-        return $this->target;
+        return $this->subject;
     }
 }

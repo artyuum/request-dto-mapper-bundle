@@ -73,11 +73,11 @@ class Mapper
     }
 
     /**
-     * Validates the target (already mapped DTO).
+     * Validates the subject (already mapped DTO).
      *
      * @throws DtoValidationException
      */
-    public function validate(Dto $attribute, object $target): void
+    public function validate(Dto $attribute, object $subject): void
     {
         if (!$this->canValidate($attribute)) {
             return;
@@ -91,11 +91,11 @@ class Mapper
 
         $request = $this->requestStack->getMainRequest();
 
-        $this->eventDispatcher->dispatch(new PreDtoValidationEvent($request, $attribute, $target));
+        $this->eventDispatcher->dispatch(new PreDtoValidationEvent($request, $attribute, $subject));
 
         $validationGroups = $this->getValidationGroups($attribute->getValidationGroups());
 
-        $errors = $this->validator->validate($target, null, $validationGroups);
+        $errors = $this->validator->validate($subject, null, $validationGroups);
 
         if ($errors->count()) {
             $request->attributes->set('_constraint_violations', $errors);
@@ -111,22 +111,24 @@ class Mapper
             }
         }
 
-        $this->eventDispatcher->dispatch(new PostDtoValidationEvent($request, $attribute, $target, $errors));
+        $this->eventDispatcher->dispatch(new PostDtoValidationEvent($request, $attribute, $subject, $errors));
     }
 
     /**
      * Maps the request data to the DTO.
      *
+     * @param Dto $attribute
+     * @param object $subject
      * @throws DtoMappingException
      * @throws SourceExtractionException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function map(Dto $attribute, object $target): void
+    public function map(Dto $attribute, object $subject): void
     {
         $request = $this->requestStack->getMainRequest();
 
-        $this->eventDispatcher->dispatch(new PreDtoMappingEvent($request, $attribute, $target));
+        $this->eventDispatcher->dispatch(new PreDtoMappingEvent($request, $attribute, $subject));
 
         $source = $attribute->getSource() ?? $this->defaultSourceConfiguration;
 
@@ -156,14 +158,14 @@ class Mapper
         }
 
         $denormalizerOptions = $this->getDenormalizerOptions($attribute->getDenormalizerOptions());
-        $denormalizerOptions[AbstractNormalizer::OBJECT_TO_POPULATE] = $target;
+        $denormalizerOptions[AbstractNormalizer::OBJECT_TO_POPULATE] = $subject;
 
         try {
-            $this->denormalizer->denormalize($data, $attribute->getTarget(), null, $denormalizerOptions);
+            $this->denormalizer->denormalize($data, $attribute->getSubject(), null, $denormalizerOptions);
         } catch (Throwable $throwable) {
             throw new DtoMappingException(previous: $throwable);
         }
 
-        $this->eventDispatcher->dispatch(new PostDtoMappingEvent($request, $attribute, $target));
+        $this->eventDispatcher->dispatch(new PostDtoMappingEvent($request, $attribute, $subject));
     }
 }

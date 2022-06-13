@@ -70,7 +70,7 @@ use Artyum\RequestDtoMapperBundle\Source\JsonSource;
 
 class PostController extends AbstractController
 {
-    #[Dto(target: PostDto::class, source: JsonSource::class, validate: true)]
+    #[Dto(subject: PostDto::class, source: JsonSource::class, validate: true)]
     public function __invoke(PostDto $postDto): Response
     {
         // At this stage, your DTO has automatically been mapped and validated.
@@ -83,7 +83,7 @@ class PostController extends AbstractController
 
 ## Attribute
 The Dto attribute has the following properties:
-- target
+- subject
 - source
 - methods
 - denormalizerOptions
@@ -91,7 +91,7 @@ The Dto attribute has the following properties:
 - validationGroups
 - throwOnViolation
 
-### Target
+### Subject
 **Type:** string  
 **Default value:** ~  
 **Required:** yes
@@ -134,7 +134,7 @@ class CustomSource implements SourceInterface
 Then pass it to the `Dto` attribute like this:
 
 ```php
-#[Dto(target: PostDto::class, source: CustomSource::class)]
+#[Dto(subject: PostDto::class, source: CustomSource::class)]
 ```
 **Note:** All classes implementing the `SourceInterface` are automatically tagged under "artyum_request_dto_mapper.source". 
 This is needed by the mapper in order to retrieve the needed source class instance from the container.

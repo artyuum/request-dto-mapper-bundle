@@ -10,19 +10,19 @@ use LogicException;
 class Dto
 {
     public function __construct(
-        private string $target, private ?string $source = null, private array $methods = [], private array $denormalizerOptions = [],
-        private ?bool  $validate = null, private array $validationGroups = [], private ?bool $throwOnViolation = null
+        private string $subject, private ?string $source = null, private array $methods = [], private array $denormalizerOptions = [],
+        private ?bool $validate = null, private array $validationGroups = [], private ?bool $throwOnViolation = null
     ) {
     }
 
-    public function getTarget(): string
+    public function getSubject(): string
     {
-        return $this->target;
+        return $this->subject;
     }
 
-    public function setTarget(string $target): void
+    public function setSubject(string $subject): void
     {
-        $this->target = $target;
+        $this->subject = $subject;
     }
 
     public function getSource(): ?string

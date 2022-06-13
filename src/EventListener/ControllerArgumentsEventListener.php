@@ -18,10 +18,10 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
     {
     }
 
-    private function getTargetFromControllerArguments(string $target, array $arguments): ?object
+    private function getSubjectFromControllerArguments(string $subject, array $arguments): ?object
     {
         foreach ($arguments as $argument) {
-            if ($argument instanceof $target) {
+            if ($argument instanceof $subject) {
                 return $argument;
             }
         }
@@ -53,21 +53,21 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
         foreach ($attributes as $attribute) {
             /** @var Dto $attribute */
             $attribute = $attribute->newInstance();
-            $target = $this->getTargetFromControllerArguments($attribute->getTarget(), $event->getArguments());
+            $subject = $this->getSubjectFromControllerArguments($attribute->getSubject(), $event->getArguments());
 
             if ($attribute->getMethods() && !in_array($request->getMethod(), $attribute->getMethods())) {
                 continue;
             }
 
-            if (!$target) {
+            if (!$subject) {
                 throw new LogicException(sprintf(
-                    'The target DTO (%s) was not found in the controller arguments.',
-                    $attribute->getTarget()
+                    'The subject (%s) was not found in the controller arguments.',
+                    $attribute->getSubject()
                 ));
             }
 
-            $this->mapper->map($attribute, $target);
-            $this->mapper->validate($attribute, $target);
+            $this->mapper->map($attribute, $subject);
+            $this->mapper->validate($attribute, $subject);
         }
     }
 
