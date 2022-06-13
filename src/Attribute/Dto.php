@@ -11,7 +11,7 @@ class Dto
 {
     public function __construct(
         private string $target, private ?string $source = null, private array $methods = [], private array $denormalizerOptions = [],
-        private ?bool  $validate = null, private array $validationGroups = []
+        private ?bool  $validate = null, private array $validationGroups = [], private ?bool $throwOnViolation = null
     ) {
     }
 
@@ -73,5 +73,15 @@ class Dto
     public function setValidationGroups(array $validationGroups): void
     {
         $this->validationGroups = $validationGroups;
+    }
+
+    public function getThrowOnViolation(): ?bool
+    {
+        return $this->throwOnViolation;
+    }
+
+    public function setThrowOnViolation(?bool $throwOnViolation): void
+    {
+        $this->throwOnViolation = $throwOnViolation;
     }
 }

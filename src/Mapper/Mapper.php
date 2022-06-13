@@ -100,7 +100,13 @@ class Mapper
         if ($errors->count()) {
             $request->attributes->set('_constraint_violations', $errors);
 
-            if ($this->validationConfiguration['throw_on_violation']) {
+            $canThrowOnViolation = $attribute->getThrowOnViolation();
+
+            if (!is_bool($canThrowOnViolation)) {
+                $canThrowOnViolation = $this->validationConfiguration['throw_on_violation'];
+            }
+
+            if ($canThrowOnViolation) {
                 throw new DtoValidationException($errors);
             }
         }
