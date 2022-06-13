@@ -8,7 +8,7 @@ This bundle provides an easy way to automatically map the incoming request data 
 - Symfony ^5.0 or ^6.0
 
 ## Installation
-```
+```bash
 composer require artyuum/request-dto-mapper-bundle 
 ```
 
@@ -50,17 +50,7 @@ This is a simple step-by-step example of how to make a DTO that will be used by 
 
 1. Create the DTO that represents the structure of the content the user will send to your controller. 
 ```php
-class PostDto {
-    /**
-     * @Assert\Sequentially({
-     *     @Assert\NotBlank,
-     *     @Assert\Type("string")
-     * })
-     *
-     * @var string|null
-     */
-    public $title;
-    
+class PostDto {    
     /**
      * @Assert\Sequentially({
      *     @Assert\NotBlank,
@@ -73,14 +63,14 @@ class PostDto {
 }
 ```
 
-2. Inject the DTO into your controller & configure it using the Dto PHP attribute.
+2. Inject the DTO into your controller & configure it using the [Dto attribute](/src/Attribute/Dto.php).
 ```php
 use Artyum\RequestDtoMapperBundle\Attribute\Dto;
 use Artyum\RequestDtoMapperBundle\Source\JsonSource;
 
 class PostController extends AbstractController
 {
-    #[Dto(subject: PostDto::class, source: JsonSource::class, validate: true)]
+    #[Dto(target: PostDto::class, source: JsonSource::class, validate: true)]
     public function __invoke(PostDto $postDto): Response
     {
         // At this stage, your DTO has automatically been mapped and validated.
@@ -91,8 +81,31 @@ class PostController extends AbstractController
 ```
 3. That's it!
 
-## Source
-The "source" is the class that implements the `SourceInterface` and it's called by the mapper when getting the data from the request.
+## Attribute
+The Dto attribute has the following properties:
+- target
+- source
+- methods
+- denormalizerOptions
+- validate
+- validationGroups
+- throwOnViolation
+
+### Target
+**Type:** string  
+**Default value:** ~  
+**Required:** yes
+
+**Description**  
+The FQCN (Fully-Qualified Class Name) of the Dto you want to map, and it must be present as your controller argument.
+
+### Source
+**Type:** string  
+**Default value:** null  
+**Required:** no
+
+**Description**  
+The "source" is the class that implements the `SourceInterface` and it's called by the mapper in order to extract  the data from the request.
 
 The bundle already comes with 5 built-in sources that should meet most of your use-cases:
 - [BodyParameterSource](/src/Source/BodyParameterSource.php) (extracts the data from `$request->request->all()`)
@@ -108,8 +121,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 class CustomSource implements SourceInterface
 {
+    // you can optionally inject dependencies
     public function __construct() {
-        // you can optionally inject dependencies
     }
 
     public function extract(Request $request): array
@@ -121,17 +134,73 @@ class CustomSource implements SourceInterface
 Then pass it to the `Dto` attribute like this:
 
 ```php
-...
-#[Dto(subject: PostDto::class, source: CustomSource::class)]
-...
+#[Dto(target: PostDto::class, source: CustomSource::class)]
 ```
 **Note:** All classes implementing the `SourceInterface` are automatically tagged under "artyum_request_dto_mapper.source". 
 This is needed by the mapper in order to retrieve the needed source class instance from the container.
 
 If you disabled "autoconfigure" option, you will need to explicitly tag your custom source in your application. 
 
+### Methods
+**Type:** array  
+**Default value:** []  
+**Required:** no
+
+**Description**  
+An array of HTTP methods that will "enable" the mapping/validation. If the array is empty, the mapper will always map the DTO and optionally validate it.
+
+### Denormalization Options
+**Type:** array  
+**Default value:** []  
+**Required:** no
+
+**Description**  
+The options that will be passed to the [denormalizer](https://symfony.com/doc/current/components/serializer.html) before mapping the DTO.
+
+### Validate
+**Type:** ?bool  
+**Default value:** null  
+**Required:** no
+
+**Description**  
+Whether to validate the Dto (once the mapping is done). Internally, the [validator component](https://symfony.com/doc/current/validation.html) will be used.
+
+### Validation Groups
+**Type:** array  
+**Default value:** []  
+**Required:** no
+
+**Description**  
+The [validation groups](https://symfony.com/doc/current/form/validation_groups.html) to pass to the validator.
+
+### Throw on violation
+**Type:** ?bool  
+**Default value:** null  
+**Required:** no
+
+**Description**  
+If the validation failed (due to the constraint violations), the [DtoValidationException](/src/Exception/DtoValidationException.php) will be thrown, and you will be able to get a list of these violations by calling the `getViolations()` method.
+
+Additionally, the constraint violations will be available as request attribute:
+```php
+$request->attributes->get('_constraint_violations')
+```
+
+Setting the value to `false` will prevent the exception from being thrown, and your controller will still be executed.
+
+If you don't set the value (leaving it as `null`), the global value (set in the configuration file) will be used.
+
 ## Events
 - [PreDtoMappingEvent](/src/Event/PreDtoMappingEvent.php) - dispatched before the mapping is made.
 - [PostDtoMappingEvent](/src/Event/PostDtoMappingEvent.php) - dispatched once the mapping is made.
 - [PreDtoValidationEvent](/src/Event/PreDtoValidationEvent.php) - dispatched before the validation is made (if the validation is enabled).
 - [PostDtoValidationEvent](/src/Event/PostDtoValidationEvent.php) - dispatched once the validation is made (if the validation is enabled).
+
+## Changelog
+This library follows [semantic versioning](https://semver.org).
+
+See the [releases pages](https://github.com/artyuum/request-dto-mapper-bundle/releases).
+
+## Contributing
+If you'd like to contribute, please fork the repository and make changes as you'd like.
+Be sure to follow the same coding style & naming used in this library to produce a consistent code.
