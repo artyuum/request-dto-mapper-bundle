@@ -16,10 +16,12 @@
         "symfony/http-kernel": "^5.0 || ^6.0",
         "symfony/config": "^5.0 || ^6.0",
         "symfony/event-dispatcher": "^5.0 || ^6.0",
-        "symfony/framework-bundle": "^5.0 || ^6.0"
+        "symfony/framework-bundle": "^5.0 || ^6.0",
+        "symfony/property-access": "^5.0 || ^6.0",
+        "symfony/property-info": "^5.0 || ^6.0"
     },
     "suggest": {
-        "symfony/validator": "For validating the DTO (if validation enabled)."
+        "symfony/validator": "For validating the DTO (if the validation is enabled)."
     },
     "license": "MIT",
     "authors": [
