@@ -28,7 +28,7 @@ class Mapper
         private array $denormalizerConfiguration, private array $validationConfiguration,
         private ServiceLocator $sourceLocator, private RequestStack $requestStack,
         private EventDispatcherInterface $eventDispatcher, private DenormalizerInterface $denormalizer,
-        private ?ValidatorInterface $validator = null,private ?string $defaultSourceConfiguration = null
+        private ?ValidatorInterface $validator = null, private ?string $defaultSourceConfiguration = null
     ) {
     }
 
@@ -142,14 +142,6 @@ class Mapper
 
         /** @var SourceInterface $sourceInstance */
         $sourceInstance = $this->sourceLocator->get($source);
-
-        if (!($sourceInstance instanceof (SourceInterface::class))) {
-            throw new LogicException(sprintf(
-                'The passed source "%s" must implement "%s".',
-                $source,
-                SourceInterface::class,
-            ));
-        }
 
         try {
             $data = $sourceInstance->extract($request);
