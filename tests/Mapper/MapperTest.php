@@ -3,53 +3,112 @@
 namespace Tests\Mapper;
 
 use Artyum\RequestDtoMapperBundle\Attribute\Dto;
-use Artyum\RequestDtoMapperBundle\Exception\SourceExtractionException;
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
+use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
 use LogicException;
 use PHPUnit\Framework\TestCase;
+use stdClass;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\UnwrappingDenormalizer;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Validator\TraceableValidator;
-use Tests\Mapper\Fixture\FooDto;
-use Tests\Mapper\Fixture\SourceNotImplementingSourceInterface;
-use Tests\Mapper\Fixture\SourceThrowingException;
 
 class MapperTest extends TestCase
 {
-    private Mapper $mapper;
-
     protected function setUp(): void
     {
+    }
+
+    private function getMapper(
+        ?array $denormalizerConfiguration = null, ?array $validationConfiguration = null, ?ServiceLocator $serviceLocator = null,
+        ?string $defaultSourceConfiguration = null
+    ): Mapper {
         $requestStackMock = $this->createMock(RequestStack::class);
-        $requestStackMock->method('getMainRequest')->willReturn(new Request());
+        $requestStackMock->method('getMainRequest')->willReturn(new Request(['foo' => 'bar']));
 
         $eventDispatcherMock = $this->getMockBuilder(EventDispatcher::class)->getMock();
         $validatorMock = $this->getMockBuilder(TraceableValidator::class)->disableOriginalConstructor()->getMock();
-        $serializerMock = $this->getMockBuilder(SerializerInterface::class)->getMock();
+        $denormalizerMock = $this->getMockBuilder(DenormalizerInterface::class)->getMock();
 
-        $this>$this->mapper = new Mapper([], [], $requestStackMock, $eventDispatcherMock, $serializerMock, $validatorMock);
+        $denormalizerConfiguration = $denormalizerConfiguration ?? [
+            'default_options'    => [],
+            'additional_options' => []
+        ];
+
+        $validationConfiguration = $validationConfiguration ?? [
+            'enabled'            => false,
+            'default_groups'     => [],
+            'additional_groups'  => [],
+            'throw_on_violation' => true,
+        ];
+        $serviceLocator = $serviceLocator ?? new ServiceLocator([]);
+
+        return new Mapper(
+            $denormalizerConfiguration,
+            $validationConfiguration,
+            $serviceLocator,
+            $requestStackMock,
+            $eventDispatcherMock,
+            new Serializer([
+                new UnwrappingDenormalizer(),
+                new ArrayDenormalizer(),
+                new ObjectNormalizer(),
+            ]),
+            $validatorMock,
+            $defaultSourceConfiguration
+        );
     }
 
-    public function testEnsureSourceIsProvided()
+    public function testItThrowsAnExceptionOnMissingSource(): void
     {
         $this->expectException(LogicException::class);
 
-        $this->mapper->map(new Dto(FooDto::class), new FooDto());
+        $mapper = $this->getMapper();
+
+        $mapper->map(new Dto(stdClass::class), new stdClass());
     }
 
-    public function testCheckProvidedSourceInterface()
+    public function testItThrowsAnExceptionOnUnknownSource(): void
     {
         $this->expectException(LogicException::class);
 
-        $this->mapper->map(new Dto(FooDto::class, SourceNotImplementingSourceInterface::class), new FooDto());
+        $mapper = $this->getMapper();
+
+        $mapper->map(new Dto(stdClass::class, stdClass::class), new stdClass());
     }
 
-    public function testExceptionWhenExtractingSourceData()
+    public function testCanMapWithADefaultSource(): void
     {
-        $this->expectException(SourceExtractionException::class);
+        $sourceMock = $this
+            ->getMockBuilder(SourceInterface::class)
+            ->getMock()
+        ;
 
-        $this->mapper->map(new Dto(FooDto::class, SourceThrowingException::class), new FooDto());
+        $sourceMock->method('extract')->willReturn(['foo' => 'bar']);
+
+        $serviceLocatorMock = $this
+            ->getMockBuilder(ServiceLocator::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['has', 'get'])
+            ->getMock()
+        ;
+
+        $serviceLocatorMock->method('has')->willReturn(true);
+        $serviceLocatorMock->method('get')->willReturn($sourceMock);
+
+        $mapper = $this->getMapper(serviceLocator: $serviceLocatorMock, defaultSourceConfiguration: SourceInterface::class);
+
+        $dto = new stdClass();
+        $dto->foo = null;
+
+        $mapper->map(new Dto(stdClass::class), $dto);
+
+        self::assertEquals($dto->foo, 'bar');
     }
 }
