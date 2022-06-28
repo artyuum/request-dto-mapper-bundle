@@ -82,7 +82,7 @@ class PostController extends AbstractController
 3. That's it!
 
 ## Attribute
-The Dto attribute has the following properties:
+The [Dto attribute](src/Attribute/Dto.php) has the following properties:
 - subject
 - source
 - methods
@@ -136,10 +136,10 @@ Then pass it to the `Dto` attribute like this:
 ```php
 #[Dto(subject: PostDto::class, source: CustomSource::class)]
 ```
-**Note:** All classes implementing the `SourceInterface` are automatically tagged under "artyum_request_dto_mapper.source". 
-This is needed by the mapper in order to retrieve the needed source class instance from the container.
+**Note:** All classes implementing the `SourceInterface` are automatically tagged as "artyum_request_dto_mapper.source",
+and this is needed by the mapper in order to retrieve the needed source class instance from the container.
 
-If you disabled "autoconfigure" option, you will need to explicitly tag your custom source in your application. 
+If you disabled `autoconfigure` option, you will need to explicitly tag your custom source in your application. 
 
 ### Methods
 **Type:** array  
