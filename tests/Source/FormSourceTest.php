@@ -24,10 +24,10 @@ class FormSourceTest extends TestCase
         $source = new FormSource();
         $extractedData = $source->extract($request);
         $expectedData = [
-            'key' => 'value',
-            'file' => new UploadedFile(path: __DIR__ . '/Fixture/sample.txt', originalName: 'sample', test: true)
+            'key'  => 'value',
+            'file' => new UploadedFile(path: __DIR__ . '/Fixture/sample.txt', originalName: 'sample', test: true),
         ];
 
-        self::assertEquals($expectedData, $extractedData);
+        self::assertSame($expectedData, $extractedData);
     }
 }

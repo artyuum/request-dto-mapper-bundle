@@ -3,14 +3,18 @@
 namespace Artyum\RequestDtoMapperBundle\EventListener;
 
 use Artyum\RequestDtoMapperBundle\Attribute\Dto;
+use Artyum\RequestDtoMapperBundle\Exception\DtoMappingException;
+use Artyum\RequestDtoMapperBundle\Exception\DtoValidationException;
+use Artyum\RequestDtoMapperBundle\Exception\SourceExtractionException;
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
 use LogicException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use ReflectionClass;
 use ReflectionException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class ControllerArgumentsEventListener implements EventSubscriberInterface
 {
@@ -31,9 +35,13 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
 
     /**
      * @throws ReflectionException
-     * @throws ExceptionInterface
+     * @throws DtoMappingException
+     * @throws DtoValidationException
+     * @throws SourceExtractionException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public function onKernelControllerArguments(ControllerArgumentsEvent $event)
+    public function onKernelControllerArguments(ControllerArgumentsEvent $event): void
     {
         $controller = $event->getController();
         $request = $event->getRequest();
@@ -55,15 +63,12 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
             $attribute = $attribute->newInstance();
             $subject = $this->getSubjectFromControllerArguments($attribute->getSubject(), $event->getArguments());
 
-            if ($attribute->getMethods() && !in_array($request->getMethod(), $attribute->getMethods())) {
+            if ($attribute->getMethods() && !in_array($request->getMethod(), $attribute->getMethods(), true)) {
                 continue;
             }
 
             if (!$subject) {
-                throw new LogicException(sprintf(
-                    'The subject (%s) was not found in the controller arguments.',
-                    $attribute->getSubject()
-                ));
+                throw new LogicException(sprintf('The subject (%s) was not found in the controller arguments.', $attribute->getSubject()));
             }
 
             $this->mapper->map($attribute, $subject);
@@ -77,7 +82,7 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::CONTROLLER_ARGUMENTS => 'onKernelControllerArguments'
+            KernelEvents::CONTROLLER_ARGUMENTS => 'onKernelControllerArguments',
         ];
     }
 }

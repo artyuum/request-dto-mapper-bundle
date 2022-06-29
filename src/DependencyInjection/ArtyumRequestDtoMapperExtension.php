@@ -4,8 +4,8 @@ namespace Artyum\RequestDtoMapperBundle\DependencyInjection;
 
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
 use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 

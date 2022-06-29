@@ -17,13 +17,13 @@ class BodyParameterSourceTest extends TestCase
     public function testRequestDataExtraction(): void
     {
         $expectedData = [
-            'key' => 'value'
+            'key' => 'value',
         ];
         $request = new Request(request: $expectedData);
         $source = new BodyParameterSource();
 
         $extractedData = $source->extract($request);
 
-        self::assertEquals($expectedData, $extractedData);
+        self::assertSame($expectedData, $extractedData);
     }
 }

@@ -29,6 +29,4 @@ class PreDtoValidationEvent extends Event
     {
         return $this->subject;
     }
-
-
 }

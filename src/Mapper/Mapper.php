@@ -84,9 +84,7 @@ class Mapper
         }
 
         if (!$this->validator) {
-            throw new LogicException(
-                'You cannot validate the DTO if the "validator" component is not available. Try running "composer require symfony/validator".'
-            );
+            throw new LogicException('You cannot validate the DTO if the "validator" component is not available. Try running "composer require symfony/validator".');
         }
 
         $request = $this->requestStack->getMainRequest();
@@ -117,8 +115,6 @@ class Mapper
     /**
      * Maps the request data to the DTO.
      *
-     * @param Dto $attribute
-     * @param object $subject
      * @throws DtoMappingException
      * @throws SourceExtractionException
      * @throws ContainerExceptionInterface

@@ -18,13 +18,13 @@ class FileSourceTest extends TestCase
     public function testRequestDataExtraction(): void
     {
         $expectedData = [
-            new UploadedFile(path: __DIR__.'/Fixture/sample.txt', originalName: 'sample', test: true)
+            new UploadedFile(path: __DIR__ . '/Fixture/sample.txt', originalName: 'sample', test: true),
         ];
         $request = new Request(files: $expectedData);
         $source = new FileSource();
 
         $extractedData = $source->extract($request);
 
-        self::assertEquals($expectedData, $extractedData);
+        self::assertSame($expectedData, $extractedData);
     }
 }

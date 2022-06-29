@@ -4,7 +4,8 @@ namespace Artyum\RequestDtoMapperBundle\Source;
 
 use Symfony\Component\HttpFoundation\Request;
 
-interface SourceInterface {
+interface SourceInterface
+{
     /**
      * Extracts the data from the request.
      */

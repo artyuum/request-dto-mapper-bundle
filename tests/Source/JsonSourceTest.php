@@ -17,13 +17,13 @@ class JsonSourceTest extends TestCase
     public function testRequestDataExtraction(): void
     {
         $expectedData = [
-            'key' => 'value'
+            'key' => 'value',
         ];
         $request = new Request(content: json_encode($expectedData));
         $source = new JsonSource();
 
         $extractedData = $source->extract($request);
 
-        self::assertEquals($expectedData, $extractedData);
+        self::assertSame($expectedData, $extractedData);
     }
 }

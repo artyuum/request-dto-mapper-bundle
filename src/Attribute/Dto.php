@@ -2,9 +2,7 @@
 
 namespace Artyum\RequestDtoMapperBundle\Attribute;
 
-use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
 use Attribute;
-use LogicException;
 
 #[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_METHOD)]
 class Dto

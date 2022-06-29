@@ -18,7 +18,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\UnwrappingDenormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Validator\TraceableValidator;
 
@@ -29,7 +28,7 @@ class MapperTest extends TestCase
     private DenormalizerInterface $denormalizer;
     private array $denormalizerConfiguration = [
         'default_options'    => [],
-        'additional_options' => []
+        'additional_options' => [],
     ];
     private array $validationConfiguration = [
         'enabled'            => false,
@@ -202,6 +201,6 @@ class MapperTest extends TestCase
 
         $mapper->map(new Dto(stdClass::class), $dto);
 
-        self::assertEquals($dto->foo, 'bar');
+        self::assertSame($dto->foo, 'bar');
     }
 }
