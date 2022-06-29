@@ -32,7 +32,6 @@ return $config
         ],
         'no_unreachable_default_argument_value'  => true,
         'no_useless_return'                      => true,
-        'php_unit_strict'                        => true,
         'phpdoc_order'                           => true,
         'strict_comparison'                      => true,
         'strict_param'                           => true,

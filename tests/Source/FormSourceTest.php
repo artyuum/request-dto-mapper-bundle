@@ -28,6 +28,6 @@ class FormSourceTest extends TestCase
             'file' => new UploadedFile(path: __DIR__ . '/Fixture/sample.txt', originalName: 'sample', test: true),
         ];
 
-        self::assertSame($expectedData, $extractedData);
+        self::assertEquals($expectedData, $extractedData);
     }
 }
