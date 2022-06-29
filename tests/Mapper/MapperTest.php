@@ -37,7 +37,7 @@ class MapperTest extends TestCase
         'throw_on_violation' => true,
     ];
     private ServiceLocator $serviceLocatorMock;
-    private ?string $defaultSourceConfiguration = null;
+    private TraceableValidator $validatorMock;
 
     protected function setUp(): void
     {

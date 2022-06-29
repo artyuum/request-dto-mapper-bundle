@@ -50,6 +50,8 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
             $class = new ReflectionClass($controller[0]);
             $attributes = $class->getMethod($controller[1])->getAttributes(Dto::class);
         } else {
+            /** @var object $controller */
+
             $class = new ReflectionClass($controller);
             $attributes = $class->getMethod('__invoke')->getAttributes(Dto::class);
         }

@@ -19,7 +19,9 @@ class JsonSourceTest extends TestCase
         $expectedData = [
             'key' => 'value',
         ];
-        $request = new Request(content: json_encode($expectedData));
+        /** @var string $content */
+        $content = json_encode($expectedData);
+        $request = new Request(content: $content);
         $source = new JsonSource();
 
         $extractedData = $source->extract($request);
