@@ -6,6 +6,3 @@ parameters:
     paths:
         - src
         - tests
-    ignoreErrors:
-        - '#Only booleans are allowed in#'
-        - '#Short ternary operator is not allowed.#'
