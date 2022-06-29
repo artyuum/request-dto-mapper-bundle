@@ -14,7 +14,7 @@ composer require artyuum/request-dto-mapper-bundle
 
 ## Configuration
 ```yml
-# config/packages/artyuum_request_dto_mapper_bundle.yaml
+# config/packages/artyuum_request_dto_mapper.yaml
 artyum_request_dto_mapper:
 
     # Used if the attribute does not specify any (must be a FQCN implementing "\Artyum\RequestDtoMapperBundle\Source\SourceInterface").
