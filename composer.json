@@ -44,7 +44,19 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5"
+        "friendsofphp/php-cs-fixer": "^3.8",
+        "phpstan/extension-installer": "^1.1",
+        "phpstan/phpstan": "^1.8",
+        "phpstan/phpstan-deprecation-rules": "^1.0",
+        "phpstan/phpstan-phpunit": "^1.1",
+        "phpstan/phpstan-strict-rules": "^1.3",
+        "phpstan/phpstan-symfony": "^1.2",
+        "phpunit/phpunit": "^9.5",
+        "symfony/validator": "^6.0"
+    },
+    "scripts": {
+        "php-cs-fixer": "./vendor/bin/php-cs-fixer fix",
+        "phpstan": "./vendor/bin/phpstan analyze"
     },
     "config": {
         "sort-packages": true
