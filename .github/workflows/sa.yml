@@ -1,0 +1,25 @@
+name: Static analysis
+
+on:
+  push:
+    branches:
+      - master
+      - wip/*
+  pull_request:
+    branches:
+      - master
+      - wip/*
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run PHPStan
+      run: composer phpstan
