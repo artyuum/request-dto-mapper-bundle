@@ -196,11 +196,6 @@ If you don't set the value (leaving it as `null`), the global value (set in the 
 - [PreDtoValidationEvent](/src/Event/PreDtoValidationEvent.php) - dispatched before the validation is made (if the validation is enabled).
 - [PostDtoValidationEvent](/src/Event/PostDtoValidationEvent.php) - dispatched once the validation is made (if the validation is enabled).
 
-## Changelog
-This library follows [semantic versioning](https://semver.org).
-
-See the [releases pages](https://github.com/artyuum/request-dto-mapper-bundle/releases).
-
 ## Contributing
 If you'd like to contribute, please fork the repository and make changes as you'd like.
 Be sure to follow the same coding style & naming used in this library to produce a consistent code.
