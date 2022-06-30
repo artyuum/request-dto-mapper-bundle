@@ -1,14 +1,6 @@
 name: Checks
 
-on:
-  push:
-    branches:
-      - master
-      - wip/*
-  pull_request:
-    branches:
-      - master
-      - wip/*
+on: push
 
 permissions:
   contents: read
