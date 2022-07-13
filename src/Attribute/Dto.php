@@ -4,23 +4,13 @@ namespace Artyum\RequestDtoMapperBundle\Attribute;
 
 use Attribute;
 
-#[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_METHOD | Attribute::TARGET_PARAMETER)]
 class Dto
 {
     public function __construct(
-        private string $subject, private ?string $source = null, private array $methods = [], private array $denormalizerOptions = [],
+        private ?string $source = null, private ?string $subject = null, private array $methods = [], private array $denormalizerOptions = [],
         private ?bool $validate = null, private array $validationGroups = [], private ?bool $throwOnViolation = null
     ) {
-    }
-
-    public function getSubject(): string
-    {
-        return $this->subject;
-    }
-
-    public function setSubject(string $subject): void
-    {
-        $this->subject = $subject;
     }
 
     public function getSource(): ?string
@@ -31,6 +21,16 @@ class Dto
     public function setSource(?string $source): void
     {
         $this->source = $source;
+    }
+
+    public function getSubject(): ?string
+    {
+        return $this->subject;
+    }
+
+    public function setSubject(string $subject): void
+    {
+        $this->subject = $subject;
     }
 
     public function getMethods(): array

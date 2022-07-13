@@ -133,7 +133,12 @@ class Mapper
         }
 
         if (!$this->sourceLocator->has($source)) {
-            throw new LogicException('Unable to the find the passed source in the container. Make sure it\'s tagged as "artyum_request_dto_mapper.source".');
+            throw new LogicException(
+                sprintf(
+                    'Unable to the find the passed source "%s" in the container. Make sure it\'s tagged as "artyum_request_dto_mapper.source".',
+                    $source
+                )
+            );
         }
 
         /** @var SourceInterface $sourceInstance */
@@ -149,7 +154,7 @@ class Mapper
         $denormalizerOptions[AbstractNormalizer::OBJECT_TO_POPULATE] = $subject;
 
         try {
-            $this->denormalizer->denormalize($data, $attribute->getSubject(), null, $denormalizerOptions);
+            $this->denormalizer->denormalize($data, $subject::class, null, $denormalizerOptions);
         } catch (Throwable $throwable) {
             throw new DtoMappingException(previous: $throwable);
         }

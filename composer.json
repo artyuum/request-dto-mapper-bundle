@@ -58,6 +58,9 @@
         "phpstan": "./vendor/bin/phpstan analyze"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
     }
 }

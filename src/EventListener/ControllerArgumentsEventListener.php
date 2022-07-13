@@ -10,8 +10,8 @@ use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
 use LogicException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use ReflectionClass;
 use ReflectionException;
+use ReflectionMethod;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -22,7 +22,10 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
     {
     }
 
-    private function getSubjectFromControllerArguments(string $subject, array $arguments): ?object
+    /**
+     * Gets the subject instance from the passed controller arguments.
+     */
+    private function getSubjectInstanceFromControllerArguments(string $subject, array $arguments): ?object
     {
         foreach ($arguments as $argument) {
             if ($argument instanceof $subject) {
@@ -31,6 +34,90 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
         }
 
         return null;
+    }
+
+    /**
+     * Gets the ReflectionMethod from the controller.
+     *
+     * @throws ReflectionException
+     */
+    private function getReflectionMethod(callable $controller): ReflectionMethod
+    {
+        if (is_array($controller)) {
+            $class = $controller[0];
+            $method = $controller[1];
+        } else {
+            /** @var object $controller */
+
+            $class = $controller;
+            $method = '__invoke';
+        }
+
+        return new ReflectionMethod($class, $method);
+    }
+
+    /**
+     * Extracts the subjects from the passed ReflectionMethod.
+     */
+    private function extractFromMethod(ReflectionMethod $reflectionMethod): array
+    {
+        $subjects = [];
+        $alreadyExtractedSubjects = [];
+        $reflectionAttributes = $reflectionMethod->getAttributes(Dto::class);
+
+        foreach ($reflectionAttributes as $reflectionAttribute) {
+            /** @var Dto $dtoAttribute */
+            $dtoAttribute = $reflectionAttribute->newInstance();
+
+            if (!$dtoAttribute->getSubject()) {
+                throw new LogicException(sprintf(
+                    'When used as a method attribute, you must set the $subject argument on the %s attribute.',
+                    Dto::class
+                ));
+            }
+
+            if (in_array($dtoAttribute->getSubject(), $alreadyExtractedSubjects, true)) {
+                throw new LogicException(sprintf(
+                    'The subject %s is present more than once in the method arguments. You must configure the %s attribute directly on the argument itself and not on the method.',
+                    $dtoAttribute->getSubject(),
+                    Dto::class,
+                ));
+            }
+
+            $alreadyExtractedSubjects[] = $dtoAttribute->getSubject();
+            $subjects[$dtoAttribute->getSubject()][] = $reflectionAttribute->newInstance();
+        }
+
+        return $subjects;
+    }
+
+    /**
+     * Extract the subjects from the passed ReflectionMethod arguments.
+     */
+    private function extractFromParameters(ReflectionMethod $reflectionMethod): array
+    {
+        $subjects = [];
+
+        foreach ($reflectionMethod->getParameters() as $index => $reflectionParameter) {
+            $reflectionAttributes = $reflectionParameter->getAttributes(Dto::class);
+
+            if (!$reflectionAttributes) {
+                continue;
+            }
+
+            $subjects[$index] = [
+                'argument' => $reflectionParameter->getType()->getName(),
+            ];
+
+            foreach ($reflectionAttributes as $reflectionAttribute) {
+                /** @var Dto $dtoAttribute */
+                $dtoAttribute = $reflectionAttribute->newInstance();
+
+                $subjects[$index]['attributes'][] = $dtoAttribute;
+            }
+        }
+
+        return $subjects;
     }
 
     /**
@@ -45,36 +132,39 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
     {
         $controller = $event->getController();
         $request = $event->getRequest();
+        $reflectionMethod = $this->getReflectionMethod($controller);
 
-        if (is_array($controller)) {
-            $class = new ReflectionClass($controller[0]);
-            $attributes = $class->getMethod($controller[1])->getAttributes(Dto::class);
-        } else {
-            /** @var object $controller */
+        $dtoAttributesFromMethod = $this->extractFromMethod($reflectionMethod);
+        $dtoAttributesFromParameters = $this->extractFromParameters($reflectionMethod);
 
-            $class = new ReflectionClass($controller);
-            $attributes = $class->getMethod('__invoke')->getAttributes(Dto::class);
-        }
-
-        if (!$attributes) {
+        if (!$dtoAttributesFromMethod && !$dtoAttributesFromParameters) {
             return;
         }
 
-        foreach ($attributes as $attribute) {
-            /** @var Dto $attribute */
-            $attribute = $attribute->newInstance();
-            $subject = $this->getSubjectFromControllerArguments($attribute->getSubject(), $event->getArguments());
+        foreach ($dtoAttributesFromMethod as $subjectFqcn => $dtoAttributes) {
+            foreach ($dtoAttributes as $dtoAttribute) {
+                if ($dtoAttribute->getMethods() && !in_array($request->getMethod(), $dtoAttribute->getMethods(), true)) {
+                    continue;
+                }
 
-            if ($attribute->getMethods() && !in_array($request->getMethod(), $attribute->getMethods(), true)) {
-                continue;
+                $subjectInstance = $this->getSubjectInstanceFromControllerArguments($subjectFqcn, $event->getArguments());
+
+                if (!$subjectInstance) {
+                    throw new LogicException(sprintf('The subject (%s) was not found in the controller arguments.', $subjectFqcn));
+                }
+
+                $this->mapper->map($dtoAttribute, $subjectInstance);
+                $this->mapper->validate($dtoAttribute, $subjectInstance);
             }
+        }
 
-            if (!$subject) {
-                throw new LogicException(sprintf('The subject (%s) was not found in the controller arguments.', $attribute->getSubject()));
+        foreach ($dtoAttributesFromParameters as $index => $dtoAttributesFromParameter) {
+            $subjectInstance = $event->getArguments()[$index];
+
+            foreach ($dtoAttributesFromParameter['attributes'] as $dtoAttribute) {
+                $this->mapper->map($dtoAttribute, $subjectInstance);
+                $this->mapper->validate($dtoAttribute, $subjectInstance);
             }
-
-            $this->mapper->map($attribute, $subject);
-            $this->mapper->validate($attribute, $subject);
         }
     }
 
