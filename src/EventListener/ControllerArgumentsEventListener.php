@@ -106,6 +106,7 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
             }
 
             $subjects[$index] = [
+                /** @phpstan-ignore-next-line */
                 'argument' => $reflectionParameter->getType()->getName(),
             ];
 
