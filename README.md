@@ -101,7 +101,9 @@ The bundle already comes with 5 built-in sources that should meet most of your u
 - [JsonSource](/src/Source/JsonSource.php) (extracts the data from `$request->toArray()`)
 - [QueryStringSource](/src/Source/QueryStringSource.php) (extracts the data from `$request->query->all()`)
 
-If these built-in sources don't meet your needs, you can implement your own source like this:
+If an error occurs after while the `extract()` method from the source class, the `SourceExtractionException` will be thrown
+
+If these built-in source classes don't meet your needs, you can implement your own source like this:
 ```php
 use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -128,8 +130,6 @@ If you don't set any value, the default value (defined in the bundle's configura
 
 **Note:** All classes implementing the `SourceInterface` are automatically tagged as "artyum_request_dto_mapper.source",
 and this is needed by the mapper in order to retrieve the needed source class instance from the container.
-
-If you disabled `autoconfigure` option, you will need to explicitly tag your custom source in your application.
 
 ### 2. Subject
 The FQCN (Fully-Qualified Class Name) of the DTO you want to map (it must be present as your controller argument).
@@ -181,6 +181,8 @@ public function __invoke(PostDto $postDto): Response
 {
 }
 ```
+
+If an error occurs while calling the `denormalize()` method from the Denormalizer, the `DtoMappingException` will be thrown.
 
 ### 5. Validate
 Whether to validate the DTO (once the mapping is done). Internally, the [validator component](https://symfony.com/doc/current/validation.html) will be used, and if you do not have it installed a `LogicException` will be thrown.
