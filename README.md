@@ -171,7 +171,7 @@ public function __invoke(PostPayload $postPayload): Response
 ```
 
 ### 4. Denormalization Options
-The options that will be passed to the [denormalizer](https://symfony.com/doc/current/components/serializer.html) before mapping the DTO.
+The options that will be passed to the [Denormalizer](https://symfony.com/doc/current/components/serializer.html) before mapping the DTO.
 
 Example:
 ```php
