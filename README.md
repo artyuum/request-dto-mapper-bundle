@@ -157,18 +157,9 @@ This is a shorter way of marking an argument that will be handled by this bundle
 It can contain an array of HTTP methods that will "enable" the mapping/validation depending on the current HTTP method. In the following example, the DTO will be mapped & validated only if the request method is "GET".
 ```php
 #[Dto(methods: ['GET'])]
-public function __invoke(PostPayload $postPayload): Response
-{
-}
 ``` 
 
 If the array is empty (this is the default value), the mapper will always map the DTO and validate it.
-```php
-#[Dto(methods: [])]
-public function __invoke(PostPayload $postPayload): Response
-{
-}
-```
 
 ### 4. Denormalization Options
 The options that will be passed to the [Denormalizer](https://symfony.com/doc/current/components/serializer.html) before mapping the DTO.
@@ -178,9 +169,6 @@ Example:
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 #[Dto(denormalizerOptions: [ObjectNormalizer::DISABLE_TYPE_ENFORCEMENT => true])]
-public function __invoke(PostPayload $postPayload): Response
-{
-}
 ```
 
 If an error occurs while calling the `denormalize()` method from the Denormalizer, the [DtoMappingException](src/Exception/DtoMappingException.php) will be thrown.
@@ -188,16 +176,20 @@ If an error occurs while calling the `denormalize()` method from the Denormalize
 ### 5. Validate
 Whether to validate the DTO (once the mapping is done). Internally, the [validator component](https://symfony.com/doc/current/validation.html) will be used, and if you do not have it installed a `LogicException` will be thrown.
 
+Example:
 ```php
 #[Dto(validate: true)]
-public function __invoke(PostPayload $postPayload): Response
-{
-}
 ```
+
 If you don't set any value, the configured value (defined in the bundle's configuration file) will be used.
 
 ### 6. Validation Groups
 The [validation groups](https://symfony.com/doc/current/form/validation_groups.html) to pass to the validator.
+
+Example:
+```php
+#[Dto(validationGroups: ['creation'])]
+```
 
 If you don't set any value, the configured value (defined in the bundle's configuration file) will be used.
 
@@ -207,6 +199,11 @@ If the validation failed (due to the constraint violations), the [DtoValidationE
 Additionally, the constraint violations will be available as request attribute:
 ```php
 $request->attributes->get('_constraint_violations')
+```
+
+Example:
+```php
+#[Dto(throwOnViolation: true)]
 ```
 
 Setting the value to `false` will prevent the exception from being thrown, and your controller will still be executed.
