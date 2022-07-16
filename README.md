@@ -50,7 +50,7 @@ This is a simple step-by-step example of how to make a DTO that will be used by 
 
 1. Create the DTO that represents the structure of the content the user will send to your controller. 
 ```php
-class PostDto {    
+class PostPayload {    
     /**
      * @Assert\Sequentially({
      *     @Assert\NotBlank,
@@ -70,10 +70,10 @@ use Artyum\RequestDtoMapperBundle\Source\JsonSource;
 
 class PostController extends AbstractController
 {
-    #[Dto(source: JsonSource::class, subject: PostDto::class, validate: true)]
-    public function __invoke(PostDto $postDto): Response
+    #[Dto(source: JsonSource::class, subject: PostPayload::class, validate: true)]
+    public function __invoke(PostPayload $postPayload): Response
     {
-        // At this stage, your DTO has automatically been mapped and validated.
+        // At this stage, your DTO has automatically been mapped (from the JSON input) and validated.
         // Your controller can safely be executed knowing that the submitted content
         // matches your requirements (defined in your DTO through the validator constraints).
     }
@@ -82,7 +82,7 @@ class PostController extends AbstractController
 
 **Alternatively**, you can set the attribute directly on the argument:
 ```php
-public function __invoke(#[Dto(source: JsonSource::class, validate: true)] PostDto $postDto): Response
+public function __invoke(#[Dto(source: JsonSource::class, validate: true)] PostPayload $postPayload): Response
 {
 }
 ```
@@ -138,15 +138,15 @@ The FQCN (Fully-Qualified Class Name) of the DTO you want to map (it must be pre
 The "subject" property is required **only** if you're setting the attribute directly on the method. Example:
 
 ```php
-#[Dto(subject: PostDto::class)]
-public function __invoke(PostDto $postDto): Response
+#[Dto(subject: PostPayload::class)]
+public function __invoke(PostPayload $postPayload): Response
 {
 }
 ```
 
 If you're setting the attribute on the method argument instead, the "subject" value can be omitted and won't be read by the mapper. Example:
 ```php
-public function __invoke(#[Dto] PostDto $postDto): Response
+public function __invoke(#[Dto] PostPayload $postPayload): Response
 {
 }
 ``` 
@@ -154,10 +154,10 @@ public function __invoke(#[Dto] PostDto $postDto): Response
 This is a shorter way of marking an argument that will be handled by this bundle, but if you have to set many options on the attribute, it's recommended to set the attribute on the method instead.
 
 ### 3. Methods
-It can contain an array of HTTP methods that will "enable" the mapping/validation depending on the current HTTP method. In the following example, the PostDto will be mapped & validated only if the request method is "GET".
+It can contain an array of HTTP methods that will "enable" the mapping/validation depending on the current HTTP method. In the following example, the DTO will be mapped & validated only if the request method is "GET".
 ```php
 #[Dto(methods: ['GET'])]
-public function __invoke(PostDto $postDto): Response
+public function __invoke(PostPayload $postPayload): Response
 {
 }
 ``` 
@@ -165,7 +165,7 @@ public function __invoke(PostDto $postDto): Response
 If the array is empty (this is the default value), the mapper will always map the DTO and validate it.
 ```php
 #[Dto(methods: [])]
-public function __invoke(PostDto $postDto): Response
+public function __invoke(PostPayload $postPayload): Response
 {
 }
 ```
@@ -178,7 +178,7 @@ Example:
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 #[Dto(denormalizerOptions: [ObjectNormalizer::DISABLE_TYPE_ENFORCEMENT => true])]
-public function __invoke(PostDto $postDto): Response
+public function __invoke(PostPayload $postPayload): Response
 {
 }
 ```
@@ -190,7 +190,7 @@ Whether to validate the DTO (once the mapping is done). Internally, the [validat
 
 ```php
 #[Dto(validate: true)]
-public function __invoke(PostDto $postDto): Response
+public function __invoke(PostPayload $postPayload): Response
 {
 }
 ```
