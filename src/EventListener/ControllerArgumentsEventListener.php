@@ -48,7 +48,6 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
             $method = $controller[1];
         } else {
             /** @var object $controller */
-
             $class = $controller;
             $method = '__invoke';
         }
@@ -70,17 +69,11 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
             $dtoAttribute = $reflectionAttribute->newInstance();
 
             if (!$dtoAttribute->getSubject()) {
-                throw new LogicException(sprintf(
-                    'When used as a method attribute, you must set the $subject argument on the %s attribute.',
-                    Dto::class
-                ));
+                throw new LogicException(sprintf('When used as a method attribute, you must set the $subject argument on the %s attribute.', Dto::class));
             }
 
             if (in_array($dtoAttribute->getSubject(), $alreadyExtractedSubjects, true)) {
-                throw new LogicException(sprintf(
-                    'The subject %s is present more than once in the method arguments. In that case, you must configure the attribute directly on the argument itself and not on the method.',
-                    $dtoAttribute->getSubject()
-                ));
+                throw new LogicException(sprintf('The subject %s is present more than once in the method arguments. In that case, you must configure the attribute directly on the argument itself and not on the method.', $dtoAttribute->getSubject()));
             }
 
             $alreadyExtractedSubjects[] = $dtoAttribute->getSubject();
@@ -105,7 +98,7 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
             }
 
             $subjects[$index] = [
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'argument' => $reflectionParameter->getType()->getName(),
             ];
 

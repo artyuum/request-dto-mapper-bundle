@@ -15,8 +15,8 @@ class DtoValidationException extends Exception
 
     public function __construct(ConstraintViolationListInterface $violations, string $message = '', int $code = 0, Throwable $previous = null)
     {
-        parent::__construct($message, $code, $previous);
         $this->violations = $violations;
+        parent::__construct($message, $code, $previous);
     }
 
     public function getViolations(): ConstraintViolationListInterface

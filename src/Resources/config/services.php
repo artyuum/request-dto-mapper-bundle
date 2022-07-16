@@ -8,9 +8,11 @@ use Artyum\RequestDtoMapperBundle\Source\FormSource;
 use Artyum\RequestDtoMapperBundle\Source\JsonSource;
 use Artyum\RequestDtoMapperBundle\Source\QueryStringSource;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
+
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelEvents;

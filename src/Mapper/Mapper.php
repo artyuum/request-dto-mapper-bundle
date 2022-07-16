@@ -133,12 +133,7 @@ class Mapper
         }
 
         if (!$this->sourceLocator->has($source)) {
-            throw new LogicException(
-                sprintf(
-                    'Unable to the find the passed source "%s" in the container. Make sure it\'s tagged as "artyum_request_dto_mapper.source".',
-                    $source
-                )
-            );
+            throw new LogicException(sprintf('Unable to the find the passed source "%s" in the container. Make sure it\'s tagged as "artyum_request_dto_mapper.source".', $source));
         }
 
         /** @var SourceInterface $sourceInstance */
