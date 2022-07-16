@@ -78,9 +78,8 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
 
             if (in_array($dtoAttribute->getSubject(), $alreadyExtractedSubjects, true)) {
                 throw new LogicException(sprintf(
-                    'The subject %s is present more than once in the method arguments. You must configure the %s attribute directly on the argument itself and not on the method.',
-                    $dtoAttribute->getSubject(),
-                    Dto::class,
+                    'The subject %s is present more than once in the method arguments. In that case, you must configure the attribute directly on the argument itself and not on the method.',
+                    $dtoAttribute->getSubject()
                 ));
             }
 
