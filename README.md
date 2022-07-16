@@ -1,6 +1,5 @@
 # Request DTO Mapper Bundle
 ![image](https://user-images.githubusercontent.com/17199757/176238266-db47d367-a18b-48ac-8516-56eb3391691a.png)
-
 This bundle provides an easy way to automatically map the incoming request data to a DTO and optionally validate it. It's using the powerful [Serializer](https://symfony.com/doc/current/components/serializer.html) component under the hood along with the [Validator](https://symfony.com/doc/current/components/validator.html) component (optional).
 
 ## Requirements
@@ -9,7 +8,7 @@ This bundle provides an easy way to automatically map the incoming request data 
 
 ## Installation
 ```bash
-composer require artyuum/request-dto-mapper-bundle 
+composer require artyuum/request-dto-mapper-bundle
 ```
 
 ## Configuration
@@ -70,7 +69,7 @@ use Artyum\RequestDtoMapperBundle\Source\JsonSource;
 
 class PostController extends AbstractController
 {
-    #[Dto(subject: PostDto::class, source: JsonSource::class, validate: true)]
+    #[Dto(source: JsonSource::class, subject: PostDto::class, validate: true)]
     public function __invoke(PostDto $postDto): Response
     {
         // At this stage, your DTO has automatically been mapped and validated.
@@ -79,33 +78,21 @@ class PostController extends AbstractController
     }
 }
 ```
+
+**Alternatively**, you can set the attribute directly on the argument:
+```php
+public function __invoke(#[Dto(source: JsonSource::class, validate: true)] PostDto $postDto): Response
+{
+}
+```
+
 3. That's it!
 
 ## Attribute
-The [Dto attribute](src/Attribute/Dto.php) has the following properties:
-- subject
-- source
-- methods
-- denormalizerOptions
-- validate
-- validationGroups
-- throwOnViolation
+The [Dto attribute](src/Attribute/Dto.php) has the following seven properties:
 
-### Subject
-**Type:** string  
-**Default value:** ~  
-**Required:** yes
-
-**Description**  
-The FQCN (Fully-Qualified Class Name) of the Dto you want to map, and it must be present as your controller argument.
-
-### Source
-**Type:** string  
-**Default value:** null  
-**Required:** no
-
-**Description**  
-The "source" is the class that implements the `SourceInterface` and it's called by the mapper in order to extract  the data from the request.
+### 1. Source
+The FQCN (Fully-Qualified Class Name) of a class that implements the `SourceInterface`. It basically contains the extraction logic and it's called by the mapper in order to extract the data from the request.
 
 The bundle already comes with 5 built-in sources that should meet most of your use-cases:
 - [BodyParameterSource](/src/Source/BodyParameterSource.php) (extracts the data from `$request->request->all()`)
@@ -134,51 +121,84 @@ class CustomSource implements SourceInterface
 Then pass it to the `Dto` attribute like this:
 
 ```php
-#[Dto(subject: PostDto::class, source: CustomSource::class)]
+#[Dto(source: CustomSource::class)]
 ```
+
+If you don't set any value, the default value (defined in the bundle's configuration file) will be used.
+
 **Note:** All classes implementing the `SourceInterface` are automatically tagged as "artyum_request_dto_mapper.source",
 and this is needed by the mapper in order to retrieve the needed source class instance from the container.
 
-If you disabled `autoconfigure` option, you will need to explicitly tag your custom source in your application. 
+If you disabled `autoconfigure` option, you will need to explicitly tag your custom source in your application.
 
-### Methods
-**Type:** array  
-**Default value:** []  
-**Required:** no
+### 2. Subject
+The FQCN (Fully-Qualified Class Name) of the DTO you want to map (it must be present as your controller argument).
 
-**Description**  
-An array of HTTP methods that will "enable" the mapping/validation. If the array is empty, the mapper will always map the DTO and optionally validate it.
+The "subject" property is required **only** if you're setting the attribute directly on the method. Example:
 
-### Denormalization Options
-**Type:** array  
-**Default value:** []  
-**Required:** no
+```php
+#[Dto(subject: PostDto::class)]
+public function __invoke(PostDto $postDto): Response
+{
+}
+```
 
-**Description**  
+If you're setting the attribute on the method argument instead, the "subject" value can be omitted and won't be read by the mapper. Example:
+```php
+public function __invoke(#[Dto] PostDto $postDto): Response
+{
+}
+``` 
+
+This is a shorter way of marking an argument that will be handled by this bundle, but if you have to set many options on the attribute, it's recommended to set the attribute on the method instead.
+
+### 3. Methods
+It can contain an array of HTTP methods that will "enable" the mapping/validation depending on the current HTTP method. In the following example, the PostDto will be mapped & validated only if the request method is "GET".
+```php
+#[Dto(methods: ['GET'])]
+public function __invoke(PostDto $postDto): Response
+{
+}
+``` 
+
+If the array is empty (this is the default value), the mapper will always map the DTO and validate it.
+```php
+#[Dto(methods: [])]
+public function __invoke(PostDto $postDto): Response
+{
+}
+```
+
+### 4. Denormalization Options
 The options that will be passed to the [denormalizer](https://symfony.com/doc/current/components/serializer.html) before mapping the DTO.
 
-### Validate
-**Type:** ?bool  
-**Default value:** null  
-**Required:** no
+Example:
+```php
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-**Description**  
-Whether to validate the Dto (once the mapping is done). Internally, the [validator component](https://symfony.com/doc/current/validation.html) will be used.
+#[Dto(denormalizerOptions: [ObjectNormalizer::DISABLE_TYPE_ENFORCEMENT => true])]
+public function __invoke(PostDto $postDto): Response
+{
+}
+```
 
-### Validation Groups
-**Type:** array  
-**Default value:** []  
-**Required:** no
+### 5. Validate
+Whether to validate the DTO (once the mapping is done). Internally, the [validator component](https://symfony.com/doc/current/validation.html) will be used, and if you do not have it installed a `LogicException` will be thrown.
 
-**Description**  
+```php
+#[Dto(validate: true)]
+public function __invoke(PostDto $postDto): Response
+{
+}
+```
+If you don't set any value, the configured value (defined in the bundle's configuration file) will be used.
+
+### 6. Validation Groups
 The [validation groups](https://symfony.com/doc/current/form/validation_groups.html) to pass to the validator.
 
-### Throw on violation
-**Type:** ?bool  
-**Default value:** null  
-**Required:** no
+If you don't set any value, the configured value (defined in the bundle's configuration file) will be used.
 
-**Description**  
+### 7. Throw on violation
 If the validation failed (due to the constraint violations), the [DtoValidationException](/src/Exception/DtoValidationException.php) will be thrown, and you will be able to get a list of these violations by calling the `getViolations()` method.
 
 Additionally, the constraint violations will be available as request attribute:
@@ -188,14 +208,10 @@ $request->attributes->get('_constraint_violations')
 
 Setting the value to `false` will prevent the exception from being thrown, and your controller will still be executed.
 
-If you don't set the value (leaving it as `null`), the global value (set in the configuration file) will be used.
+If you don't set any value, the configured value (defined in the bundle's configuration file) will be used.
 
 ## Events
 - [PreDtoMappingEvent](/src/Event/PreDtoMappingEvent.php) - dispatched before the mapping is made.
 - [PostDtoMappingEvent](/src/Event/PostDtoMappingEvent.php) - dispatched once the mapping is made.
 - [PreDtoValidationEvent](/src/Event/PreDtoValidationEvent.php) - dispatched before the validation is made (if the validation is enabled).
 - [PostDtoValidationEvent](/src/Event/PostDtoValidationEvent.php) - dispatched once the validation is made (if the validation is enabled).
-
-## Contributing
-If you'd like to contribute, please fork the repository and make changes as you'd like.
-Be sure to follow the same coding style & naming used in this library to produce a consistent code.
