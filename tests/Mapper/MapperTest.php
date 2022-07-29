@@ -3,6 +3,8 @@
 namespace Tests\Mapper;
 
 use Artyum\RequestDtoMapperBundle\Attribute\Dto;
+use Artyum\RequestDtoMapperBundle\Event\PostDtoMappingEvent;
+use Artyum\RequestDtoMapperBundle\Event\PreDtoMappingEvent;
 use Artyum\RequestDtoMapperBundle\Exception\DtoMappingException;
 use Artyum\RequestDtoMapperBundle\Exception\SourceExtractionException;
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
@@ -36,7 +38,6 @@ class MapperTest extends TestCase
         'additional_groups'  => [],
         'throw_on_violation' => true,
     ];
-    private ServiceLocator $serviceLocatorMock;
     private TraceableValidator $validatorMock;
 
     protected function setUp(): void
@@ -50,7 +51,6 @@ class MapperTest extends TestCase
             new ArrayDenormalizer(),
             new ObjectNormalizer(),
         ]);
-        $this->serviceLocatorMock = new ServiceLocator([]);
     }
 
     public function testItThrowsAnExceptionOnMissingSource(): void
@@ -60,7 +60,7 @@ class MapperTest extends TestCase
         $mapper = new Mapper(
             $this->denormalizerConfiguration,
             $this->validationConfiguration,
-            $this->serviceLocatorMock,
+            new ServiceLocator([]),
             $this->requestStackMock,
             $this->eventDispatcherMock,
             $this->denormalizer,
@@ -77,7 +77,7 @@ class MapperTest extends TestCase
         $mapper = new Mapper(
             $this->denormalizerConfiguration,
             $this->validationConfiguration,
-            $this->serviceLocatorMock,
+            new ServiceLocator([]),
             $this->requestStackMock,
             $this->eventDispatcherMock,
             $this->denormalizer,
@@ -202,5 +202,47 @@ class MapperTest extends TestCase
         $mapper->map(new Dto(stdClass::class), $dto);
 
         self::assertSame($dto->foo, 'bar');
+    }
+
+    public function testItDispatchesTheMappingRelatedEvents()
+    {
+        $sourceMock = $this
+            ->getMockBuilder(SourceInterface::class)
+            ->getMock()
+        ;
+
+        $sourceMock->method('extract')->willReturn([]);
+
+        $serviceLocatorMock = $this
+            ->getMockBuilder(ServiceLocator::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['has', 'get'])
+            ->getMock()
+        ;
+
+        $serviceLocatorMock->method('has')->willReturn(true);
+        $serviceLocatorMock->method('get')->willReturn($sourceMock);
+
+        $this->eventDispatcherMock
+            ->expects($this->exactly(2))
+            ->method('dispatch')
+            ->withConsecutive(
+                [$this->isInstanceOf(PreDtoMappingEvent::class)],
+                [$this->isInstanceOf(PostDtoMappingEvent::class)]
+            )
+        ;
+
+        $mapper = new Mapper(
+            $this->denormalizerConfiguration,
+            $this->validationConfiguration,
+            $serviceLocatorMock,
+            $this->requestStackMock,
+            $this->eventDispatcherMock,
+            $this->denormalizer,
+            $this->validatorMock,
+            SourceInterface::class
+        );
+
+        $mapper->map(new Dto(stdClass::class), new stdClass());
     }
 }
