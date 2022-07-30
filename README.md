@@ -117,7 +117,7 @@ class CustomSource implements SourceInterface
 
     public function extract(Request $request): array
     {
-        // custom extraction logic here 
+        // your custom extraction logic here 
     }
 }
 ```

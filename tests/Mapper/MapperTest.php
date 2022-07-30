@@ -4,8 +4,11 @@ namespace Tests\Mapper;
 
 use Artyum\RequestDtoMapperBundle\Attribute\Dto;
 use Artyum\RequestDtoMapperBundle\Event\PostDtoMappingEvent;
+use Artyum\RequestDtoMapperBundle\Event\PostDtoValidationEvent;
 use Artyum\RequestDtoMapperBundle\Event\PreDtoMappingEvent;
+use Artyum\RequestDtoMapperBundle\Event\PreDtoValidationEvent;
 use Artyum\RequestDtoMapperBundle\Exception\DtoMappingException;
+use Artyum\RequestDtoMapperBundle\Exception\DtoValidationException;
 use Artyum\RequestDtoMapperBundle\Exception\SourceExtractionException;
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
 use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
@@ -21,6 +24,7 @@ use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator\TraceableValidator;
 
 class MapperTest extends TestCase
@@ -204,7 +208,7 @@ class MapperTest extends TestCase
         self::assertSame($dto->foo, 'bar');
     }
 
-    public function testItDispatchesTheMappingRelatedEvents()
+    public function testItDispatchesTheMappingRelatedEvents(): void
     {
         $sourceMock = $this
             ->getMockBuilder(SourceInterface::class)
@@ -244,5 +248,73 @@ class MapperTest extends TestCase
         );
 
         $mapper->map(new Dto(stdClass::class), new stdClass());
+    }
+
+    public function testItThrowsAnExceptionIfTheValidatorIsNotInstalled(): void
+    {
+        $this->expectException(LogicException::class);
+
+        $mapper = new Mapper(
+            $this->denormalizerConfiguration,
+            $this->validationConfiguration,
+            new ServiceLocator([]),
+            $this->requestStackMock,
+            $this->eventDispatcherMock,
+            $this->denormalizer,
+            null,
+            SourceInterface::class
+        );
+
+        $mapper->validate(new Dto(stdClass::class, validate: true), new stdClass());
+    }
+
+    public function testItDispatchesTheValidationRelatedEvents(): void
+    {
+        $this->eventDispatcherMock
+            ->expects($this->exactly(2))
+            ->method('dispatch')
+            ->withConsecutive(
+                [$this->isInstanceOf(PreDtoValidationEvent::class)],
+                [$this->isInstanceOf(PostDtoValidationEvent::class)]
+            )
+        ;
+
+        $mapper = new Mapper(
+            $this->denormalizerConfiguration,
+            $this->validationConfiguration,
+            new ServiceLocator([]),
+            $this->requestStackMock,
+            $this->eventDispatcherMock,
+            $this->denormalizer,
+            $this->validatorMock,
+            SourceInterface::class
+        );
+
+        $mapper->validate(new Dto(stdClass::class, validate: true), new stdClass());
+    }
+
+    public function testItThrowsAnExceptionOnConstraintViolations(): void
+    {
+        $this->expectException(DtoValidationException::class);
+
+        $this->validatorMock
+            ->method('validate')
+            ->willReturnCallback(function () {
+                return ConstraintViolationList::createFromMessage('test');
+            })
+        ;
+
+        $mapper = new Mapper(
+            $this->denormalizerConfiguration,
+            $this->validationConfiguration,
+            new ServiceLocator([]),
+            $this->requestStackMock,
+            $this->eventDispatcherMock,
+            $this->denormalizer,
+            $this->validatorMock,
+            SourceInterface::class
+        );
+
+        $mapper->validate(new Dto(stdClass::class, validate: true), new stdClass());
     }
 }
