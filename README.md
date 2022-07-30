@@ -102,7 +102,7 @@ The bundle already comes with 5 built-in sources that should meet most of your u
 - [JsonSource](/src/Source/JsonSource.php) (extracts the data from `$request->toArray()`)
 - [QueryStringSource](/src/Source/QueryStringSource.php) (extracts the data from `$request->query->all()`)
 
-If an error occurs after while the `extract()` method from the source class, the [SourceExtractionException](src/Exception/SourceExtractionException.php) will be thrown
+If an error occurs while calling the `extract()` method from the source class, the [SourceExtractionException](src/Exception/SourceExtractionException.php) will be thrown
 
 If these built-in source classes don't meet your needs, you can implement your own source like this:
 ```php
