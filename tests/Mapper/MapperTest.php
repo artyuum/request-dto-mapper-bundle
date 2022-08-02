@@ -11,8 +11,8 @@ use Artyum\RequestDtoMapperBundle\Exception\DtoMappingException;
 use Artyum\RequestDtoMapperBundle\Exception\DtoValidationException;
 use Artyum\RequestDtoMapperBundle\Exception\SourceExtractionException;
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
+use Artyum\RequestDtoMapperBundle\Source\JsonSource;
 use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
-use Exception;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -20,154 +20,127 @@ use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
+use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator\TraceableValidator;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Tests\Fixtures\Dto\FooDto;
+use Tests\Fixtures\Source\ErroringSource;
 
 class MapperTest extends TestCase
 {
-    private RequestStack $requestStackMock;
-    private EventDispatcher $eventDispatcherMock;
-    private DenormalizerInterface $denormalizer;
-    private array $denormalizerConfiguration = [
-        'default_options'    => [],
-        'additional_options' => [],
-    ];
-    private array $validationConfiguration = [
-        'enabled'            => false,
-        'default_groups'     => [],
-        'additional_groups'  => [],
-        'throw_on_violation' => true,
-    ];
-    private TraceableValidator $validatorMock;
+    private function getMapper(
+        ?ServiceLocator $serviceLocator = null, ?Request $request = null, ?EventDispatcher $eventDispatcher = null,
+        ?string $defaultSource = null, ?ValidatorInterface $validator = null
+    ): Mapper {
+        $denormalizerConfiguration = [
+            'default_options'    => [],
+            'additional_options' => [],
+        ];
 
-    protected function setUp(): void
-    {
-        $this->requestStackMock = $this->createMock(RequestStack::class);
-        $this->requestStackMock->method('getMainRequest')->willReturn(new Request(['foo' => 'bar']));
+        $validationConfiguration = [
+            'enabled'            => false,
+            'default_groups'     => [],
+            'additional_groups'  => [],
+            'throw_on_violation' => true,
+        ];
 
-        $this->eventDispatcherMock = $this->getMockBuilder(EventDispatcher::class)->getMock();
-        $this->validatorMock = $this->getMockBuilder(TraceableValidator::class)->disableOriginalConstructor()->getMock();
-        $this->denormalizer = new Serializer([
-            new ArrayDenormalizer(),
-            new ObjectNormalizer(),
+        $serializer = new Serializer([
+            new ObjectNormalizer(propertyTypeExtractor: new PropertyInfoExtractor(typeExtractors: [
+                new PhpDocExtractor()
+            ])),
         ]);
+
+        $serviceLocator = $serviceLocator ?? new ServiceLocator([]);
+
+        $requestStack = new RequestStack();
+        $requestStack->push($request ?? Request::create('/'));
+
+        $eventDispatcher = $eventDispatcher ?? new EventDispatcher();
+
+        return new Mapper(
+            $denormalizerConfiguration,
+            $validationConfiguration,
+            $serviceLocator,
+            $requestStack,
+            $eventDispatcher,
+            $serializer,
+            $validator,
+            $defaultSource
+        );
     }
 
     public function testItThrowsAnExceptionOnMissingSource(): void
     {
         $this->expectException(LogicException::class);
 
-        $mapper = new Mapper(
-            $this->denormalizerConfiguration,
-            $this->validationConfiguration,
-            new ServiceLocator([]),
-            $this->requestStackMock,
-            $this->eventDispatcherMock,
-            $this->denormalizer,
-            $this->validatorMock,
-        );
-
-        $mapper->map(new Dto(stdClass::class), new stdClass());
+        $this
+            ->getMapper()
+            ->map(new Dto(stdClass::class), new stdClass())
+        ;
     }
 
     public function testItThrowsAnExceptionOnUnknownSource(): void
     {
         $this->expectException(LogicException::class);
 
-        $mapper = new Mapper(
-            $this->denormalizerConfiguration,
-            $this->validationConfiguration,
-            new ServiceLocator([]),
-            $this->requestStackMock,
-            $this->eventDispatcherMock,
-            $this->denormalizer,
-            $this->validatorMock,
-        );
-
-        $mapper->map(new Dto(stdClass::class, stdClass::class), new stdClass());
+        $this
+            ->getMapper()
+            ->map(new Dto(stdClass::class, stdClass::class), new stdClass())
+        ;
     }
 
     public function testItThrowsAnExceptionOnSourceExtractionFailure(): void
     {
         $this->expectException(SourceExtractionException::class);
 
-        $sourceMock = $this
-            ->getMockBuilder(SourceInterface::class)
-            ->getMock()
+        $serviceLocator = $this->createMock(ServiceLocator::class);
+        $serviceLocator
+            ->expects($this->once())
+            ->method('has')
+            ->with(ErroringSource::class)
+            ->willReturn(true)
+        ;
+        $serviceLocator
+            ->expects($this->once())
+            ->method('get')
+            ->willReturn(new ErroringSource())
         ;
 
-        $sourceMock->method('extract')->willReturnCallback(function () {
-            throw new Exception();
-        });
-
-        $serviceLocatorMock = $this
-            ->getMockBuilder(ServiceLocator::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['has', 'get'])
-            ->getMock()
+        $this
+            ->getMapper($serviceLocator)
+            ->map(new Dto(ErroringSource::class, stdClass::class), new stdClass())
         ;
-
-        $serviceLocatorMock->method('has')->willReturn(true);
-        $serviceLocatorMock->method('get')->willReturn($sourceMock);
-
-        $mapper = new Mapper(
-            $this->denormalizerConfiguration,
-            $this->validationConfiguration,
-            $serviceLocatorMock,
-            $this->requestStackMock,
-            $this->eventDispatcherMock,
-            $this->denormalizer,
-            $this->validatorMock,
-        );
-
-        $mapper->map(new Dto(stdClass::class, stdClass::class), new stdClass());
     }
 
     public function testItThrowsAnExceptionOnMappingFailure(): void
     {
         $this->expectException(DtoMappingException::class);
 
-        $sourceMock = $this
-            ->getMockBuilder(SourceInterface::class)
-            ->getMock()
+        $serviceLocator = $this->createMock(ServiceLocator::class);
+        $serviceLocator
+            ->expects($this->once())
+            ->method('has')
+            ->with(JsonSource::class)
+            ->willReturn(true)
+        ;
+        $serviceLocator
+            ->expects($this->once())
+            ->method('get')
+            ->willReturn(new JsonSource())
         ;
 
-        $sourceMock->method('extract')->willReturn(['foo' => 'bar']);
+        $request = Request::create('/', content: json_encode([
+            'foo' => 123
+        ]));
 
-        $serviceLocatorMock = $this
-            ->getMockBuilder(ServiceLocator::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['has', 'get'])
-            ->getMock()
+        $this
+            ->getMapper($serviceLocator, $request)
+            ->map(new Dto(JsonSource::class, FooDto::class), new FooDto())
         ;
-
-        $serviceLocatorMock->method('has')->willReturn(true);
-        $serviceLocatorMock->method('get')->willReturn($sourceMock);
-
-        $denormalizerMock = $this
-            ->getMockBuilder(DenormalizerInterface::class)
-            ->getMock()
-        ;
-
-        $denormalizerMock->method('denormalize')->willReturnCallback(function () {
-            throw new Exception();
-        });
-
-        $mapper = new Mapper(
-            $this->denormalizerConfiguration,
-            $this->validationConfiguration,
-            $serviceLocatorMock,
-            $this->requestStackMock,
-            $this->eventDispatcherMock,
-            $denormalizerMock,
-            $this->validatorMock,
-        );
-
-        $mapper->map(new Dto(stdClass::class, stdClass::class), new stdClass());
     }
 
     public function testItMapsWithADefaultConfiguredSource(): void
@@ -189,21 +162,13 @@ class MapperTest extends TestCase
         $serviceLocatorMock->method('has')->willReturn(true);
         $serviceLocatorMock->method('get')->willReturn($sourceMock);
 
-        $mapper = new Mapper(
-            $this->denormalizerConfiguration,
-            $this->validationConfiguration,
-            $serviceLocatorMock,
-            $this->requestStackMock,
-            $this->eventDispatcherMock,
-            $this->denormalizer,
-            $this->validatorMock,
-            SourceInterface::class
-        );
-
         $dto = new stdClass();
         $dto->foo = null;
 
-        $mapper->map(new Dto(stdClass::class), $dto);
+        $this
+            ->getMapper($serviceLocatorMock, defaultSource: SourceInterface::class)
+            ->map(new Dto(stdClass::class), $dto)
+        ;
 
         self::assertSame($dto->foo, 'bar');
     }
@@ -217,17 +182,23 @@ class MapperTest extends TestCase
 
         $sourceMock->method('extract')->willReturn([]);
 
-        $serviceLocatorMock = $this
-            ->getMockBuilder(ServiceLocator::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['has', 'get'])
-            ->getMock()
+        $serviceLocatorMock = $this->createMock(ServiceLocator::class);
+
+        $serviceLocatorMock
+            ->expects($this->once())
+            ->method('has')
+            ->with(stdClass::class)
+            ->willReturn(true)
         ;
 
-        $serviceLocatorMock->method('has')->willReturn(true);
-        $serviceLocatorMock->method('get')->willReturn($sourceMock);
+        $serviceLocatorMock
+            ->method('get')
+            ->willReturn($sourceMock)
+        ;
 
-        $this->eventDispatcherMock
+        $eventDispatcherMock = $this->createMock(EventDispatcher::class);
+
+        $eventDispatcherMock
             ->expects($this->exactly(2))
             ->method('dispatch')
             ->withConsecutive(
@@ -236,42 +207,26 @@ class MapperTest extends TestCase
             )
         ;
 
-        $mapper = new Mapper(
-            $this->denormalizerConfiguration,
-            $this->validationConfiguration,
-            $serviceLocatorMock,
-            $this->requestStackMock,
-            $this->eventDispatcherMock,
-            $this->denormalizer,
-            $this->validatorMock,
-            SourceInterface::class
-        );
-
-        $mapper->map(new Dto(stdClass::class), new stdClass());
+        $this
+            ->getMapper($serviceLocatorMock, eventDispatcher: $eventDispatcherMock)
+            ->map(new Dto(stdClass::class), new stdClass())
+        ;
     }
 
     public function testItThrowsAnExceptionIfTheValidatorIsNotInstalled(): void
     {
         $this->expectException(LogicException::class);
 
-        $mapper = new Mapper(
-            $this->denormalizerConfiguration,
-            $this->validationConfiguration,
-            new ServiceLocator([]),
-            $this->requestStackMock,
-            $this->eventDispatcherMock,
-            $this->denormalizer,
-            null,
-            SourceInterface::class
-        );
-
-        $mapper->validate(new Dto(stdClass::class, validate: true), new stdClass());
+        $this
+            ->getMapper()
+            ->validate(new Dto(validate: true), new stdClass())
+        ;
     }
 
     public function testItDispatchesTheValidationRelatedEvents(): void
     {
-        $this->eventDispatcherMock
-            ->expects($this->exactly(2))
+        $eventDispatcherMock = $this->createMock(EventDispatcher::class);
+        $eventDispatcherMock->expects($this->exactly(2))
             ->method('dispatch')
             ->withConsecutive(
                 [$this->isInstanceOf(PreDtoValidationEvent::class)],
@@ -279,42 +234,30 @@ class MapperTest extends TestCase
             )
         ;
 
-        $mapper = new Mapper(
-            $this->denormalizerConfiguration,
-            $this->validationConfiguration,
-            new ServiceLocator([]),
-            $this->requestStackMock,
-            $this->eventDispatcherMock,
-            $this->denormalizer,
-            $this->validatorMock,
-            SourceInterface::class
-        );
+        $validatorMock = $this->createMock(ValidatorInterface::class);
 
-        $mapper->validate(new Dto(stdClass::class, validate: true), new stdClass());
+        $this
+            ->getMapper(eventDispatcher: $eventDispatcherMock, validator: $validatorMock)
+            ->validate(new Dto(validate: true), new stdClass())
+        ;
     }
 
     public function testItThrowsAnExceptionOnConstraintViolations(): void
     {
         $this->expectException(DtoValidationException::class);
 
-        $this->validatorMock
+        $validatorMock = $this->createMock(ValidatorInterface::class);
+        $validatorMock
+            ->expects($this->once())
             ->method('validate')
             ->willReturnCallback(function () {
                 return ConstraintViolationList::createFromMessage('test');
             })
         ;
 
-        $mapper = new Mapper(
-            $this->denormalizerConfiguration,
-            $this->validationConfiguration,
-            new ServiceLocator([]),
-            $this->requestStackMock,
-            $this->eventDispatcherMock,
-            $this->denormalizer,
-            $this->validatorMock,
-            SourceInterface::class
-        );
-
-        $mapper->validate(new Dto(stdClass::class, validate: true), new stdClass());
+        $this
+            ->getMapper(validator: $validatorMock)
+            ->validate(new Dto(stdClass::class, validate: true), new stdClass())
+        ;
     }
 }
