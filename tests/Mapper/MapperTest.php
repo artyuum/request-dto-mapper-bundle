@@ -29,6 +29,7 @@ use Symfony\Component\Validator\Validator\TraceableValidator;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Tests\Fixtures\Dto\FooDto;
 use Tests\Fixtures\Source\ErroringSource;
+use function PHPUnit\Framework\assertSame;
 
 class MapperTest extends TestCase
 {
@@ -97,21 +98,22 @@ class MapperTest extends TestCase
     {
         $this->expectException(SourceExtractionException::class);
 
-        $serviceLocator = $this->createMock(ServiceLocator::class);
-        $serviceLocator
+        $serviceLocatorMock = $this->createMock(ServiceLocator::class);
+        $serviceLocatorMock
             ->expects($this->once())
             ->method('has')
             ->with(ErroringSource::class)
             ->willReturn(true)
         ;
-        $serviceLocator
+        $serviceLocatorMock
             ->expects($this->once())
             ->method('get')
+            ->with(ErroringSource::class)
             ->willReturn(new ErroringSource())
         ;
 
         $this
-            ->getMapper($serviceLocator)
+            ->getMapper($serviceLocatorMock)
             ->map(new Dto(ErroringSource::class, stdClass::class), new stdClass())
         ;
     }
@@ -120,16 +122,17 @@ class MapperTest extends TestCase
     {
         $this->expectException(DtoMappingException::class);
 
-        $serviceLocator = $this->createMock(ServiceLocator::class);
-        $serviceLocator
+        $serviceLocatorMock = $this->createMock(ServiceLocator::class);
+        $serviceLocatorMock
             ->expects($this->once())
             ->method('has')
             ->with(JsonSource::class)
             ->willReturn(true)
         ;
-        $serviceLocator
+        $serviceLocatorMock
             ->expects($this->once())
             ->method('get')
+            ->with(JsonSource::class)
             ->willReturn(new JsonSource())
         ;
 
@@ -138,7 +141,7 @@ class MapperTest extends TestCase
         ]));
 
         $this
-            ->getMapper($serviceLocator, $request)
+            ->getMapper($serviceLocatorMock, $request)
             ->map(new Dto(JsonSource::class, FooDto::class), new FooDto())
         ;
     }
@@ -152,11 +155,19 @@ class MapperTest extends TestCase
 
         $sourceMock->method('extract')->willReturn(['foo' => 'bar']);
 
-        $serviceLocatorMock = $this
-            ->getMockBuilder(ServiceLocator::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['has', 'get'])
-            ->getMock()
+        $serviceLocatorMock = $this->createMock(ServiceLocator::class);
+
+        $serviceLocatorMock
+            ->expects($this->once())
+            ->method('has')
+            ->with(stdClass::class)
+            ->willReturn(true)
+        ;
+        $serviceLocatorMock
+            ->expects($this->once())
+            ->method('get')
+            ->with(stdClass::class)
+            ->willReturn($sourceMock)
         ;
 
         $serviceLocatorMock->method('has')->willReturn(true);
@@ -170,7 +181,7 @@ class MapperTest extends TestCase
             ->map(new Dto(stdClass::class), $dto)
         ;
 
-        self::assertSame($dto->foo, 'bar');
+        $this->assertSame($dto->foo, 'bar');
     }
 
     public function testItDispatchesTheMappingRelatedEvents(): void
@@ -192,7 +203,9 @@ class MapperTest extends TestCase
         ;
 
         $serviceLocatorMock
+            ->expects($this->once())
             ->method('get')
+            ->with(stdClass::class)
             ->willReturn($sourceMock)
         ;
 
@@ -223,6 +236,21 @@ class MapperTest extends TestCase
         ;
     }
 
+    public function testItDoesNotValidateIfDisabled(): void
+    {
+        $validatorMock = $this->createMock(ValidatorInterface::class);
+
+        $validatorMock
+            ->expects($this->never())
+            ->method('validate')
+        ;
+
+        $this
+            ->getMapper(validator: $validatorMock)
+            ->validate(new Dto(validate: false), new stdClass())
+        ;
+    }
+
     public function testItDispatchesTheValidationRelatedEvents(): void
     {
         $eventDispatcherMock = $this->createMock(EventDispatcher::class);
@@ -250,14 +278,48 @@ class MapperTest extends TestCase
         $validatorMock
             ->expects($this->once())
             ->method('validate')
-            ->willReturnCallback(function () {
-                return ConstraintViolationList::createFromMessage('test');
-            })
+            ->willReturnCallback(fn () => ConstraintViolationList::createFromMessage('test'))
         ;
 
         $this
             ->getMapper(validator: $validatorMock)
             ->validate(new Dto(stdClass::class, validate: true), new stdClass())
         ;
+    }
+
+    public function testItDoesNotThrowAnExceptionOnConstraintViolationsIfConfiguredOnTheAttribute(): void
+    {
+        $validatorMock = $this->createMock(ValidatorInterface::class);
+        $validatorMock
+            ->expects($this->once())
+            ->method('validate')
+            ->willReturnCallback(fn () => ConstraintViolationList::createFromMessage('test'))
+        ;
+
+        $this
+            ->getMapper(validator: $validatorMock)
+            ->validate(new Dto(stdClass::class, validate: true, throwOnViolation: false), new stdClass())
+        ;
+    }
+
+    public function testItStoresTheConstraintViolationsAsRequestAttribute(): void
+    {
+        $constraintViolationList = ConstraintViolationList::createFromMessage('test');
+
+        $validatorMock = $this->createMock(ValidatorInterface::class);
+        $validatorMock
+            ->expects($this->once())
+            ->method('validate')
+            ->willReturnCallback(fn () => $constraintViolationList)
+        ;
+
+        $request = Request::create('/');
+
+        $this
+            ->getMapper(request: $request, validator: $validatorMock)
+            ->validate(new Dto(stdClass::class, validate: true, throwOnViolation: false), new stdClass())
+        ;
+
+        $this->assertSame($constraintViolationList, $request->attributes->get('_constraint_violations'));
     }
 }
