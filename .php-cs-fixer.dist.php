@@ -3,6 +3,7 @@
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__ . '/src')
     ->in(__DIR__ . '/tests')
+    ->notPath(__DIR__ . '.php-cs-fixer.dist.php')
 ;
 
 $config = new PhpCsFixer\Config();
