@@ -25,11 +25,9 @@ use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\ConstraintViolationList;
-use Symfony\Component\Validator\Validator\TraceableValidator;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Tests\Fixtures\Dto\FooDto;
 use Tests\Fixtures\Source\ErroringSource;
-use function PHPUnit\Framework\assertSame;
 
 class MapperTest extends TestCase
 {
@@ -51,7 +49,7 @@ class MapperTest extends TestCase
 
         $serializer = new Serializer([
             new ObjectNormalizer(propertyTypeExtractor: new PropertyInfoExtractor(typeExtractors: [
-                new PhpDocExtractor()
+                new PhpDocExtractor(),
             ])),
         ]);
 
@@ -138,7 +136,7 @@ class MapperTest extends TestCase
 
         /** @var string $json */
         $json = json_encode([
-            'foo' => 123
+            'foo' => 123,
         ]);
         $request = Request::create('/', content: $json);
 

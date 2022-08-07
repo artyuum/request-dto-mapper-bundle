@@ -9,7 +9,8 @@ use Symfony\Component\HttpFoundation\Request;
 class ErroringSource implements SourceInterface
 {
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
      * @throws Exception
      */
     public function extract(Request $request): array
