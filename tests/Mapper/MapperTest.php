@@ -82,13 +82,23 @@ class MapperTest extends TestCase
         ;
     }
 
-    public function testItThrowsAnExceptionOnUnknownSource(): void
+    public function testItThrowsAnExceptionOnNonRegisteredSource(): void
     {
         $this->expectException(LogicException::class);
 
         $this
             ->getMapper()
             ->map(new Dto(stdClass::class, stdClass::class), new stdClass())
+        ;
+    }
+
+    public function testItThrowsAnExceptionOnUnknownSource(): void
+    {
+        $this->expectException(LogicException::class);
+
+        $this
+            ->getMapper()
+            ->map(new Dto(), new stdClass())
         ;
     }
 
