@@ -136,9 +136,11 @@ class MapperTest extends TestCase
             ->willReturn(new JsonSource())
         ;
 
-        $request = Request::create('/', content: json_encode([
+        /** @var string $json */
+        $json = json_encode([
             'foo' => 123
-        ]));
+        ]);
+        $request = Request::create('/', content: $json);
 
         $this
             ->getMapper($serviceLocatorMock, $request)
