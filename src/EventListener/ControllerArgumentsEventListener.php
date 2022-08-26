@@ -56,7 +56,7 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
     }
 
     /**
-     * Extracts the subjects from the passed ReflectionMethod.
+     * Extracts the Dto subjects from the passed ReflectionMethod.
      */
     private function extractFromMethod(ReflectionMethod $reflectionMethod): array
     {
@@ -84,7 +84,7 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
     }
 
     /**
-     * Extract the subjects from the passed ReflectionMethod arguments.
+     * Extracts the Dto subjects from the passed ReflectionMethod parameters.
      */
     private function extractFromParameters(ReflectionMethod $reflectionMethod): array
     {
