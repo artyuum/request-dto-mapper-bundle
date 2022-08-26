@@ -56,7 +56,7 @@ class MapperTest extends TestCase
         $serviceLocator = $serviceLocator ?? new ServiceLocator([]);
 
         $requestStack = new RequestStack();
-        $requestStack->push($request ?? Request::create('/'));
+        $requestStack->push($request ?? new Request());
 
         $eventDispatcher = $eventDispatcher ?? new EventDispatcher();
 
@@ -148,7 +148,7 @@ class MapperTest extends TestCase
         $json = json_encode([
             'foo' => 123,
         ]);
-        $request = Request::create('/', content: $json);
+        $request = new Request(content: $json);
 
         $this
             ->getMapper($serviceLocatorMock, $request)
@@ -323,7 +323,7 @@ class MapperTest extends TestCase
             ->willReturnCallback(fn () => $constraintViolationList)
         ;
 
-        $request = Request::create('/');
+        $request = new Request();
 
         $this
             ->getMapper(request: $request, validator: $validatorMock)
