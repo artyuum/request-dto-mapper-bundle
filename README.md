@@ -18,6 +18,7 @@ composer require artyuum/request-dto-mapper-bundle
 artyum_request_dto_mapper:
 
     # Used if the attribute does not specify any (must be a FQCN implementing "\Artyum\RequestDtoMapperBundle\Source\SourceInterface").
+    # e.g. \Artyum\RequestDtoMapperBundle\Source\JsonSource
     default_source:       ~
 
     # The configuration related to the denormalizer (https://symfony.com/doc/current/components/serializer.html).
