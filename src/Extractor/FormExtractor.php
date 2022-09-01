@@ -1,10 +1,10 @@
 <?php
 
-namespace Artyum\RequestDtoMapperBundle\Source;
+namespace Artyum\RequestDtoMapperBundle\Extractor;
 
 use Symfony\Component\HttpFoundation\Request;
 
-class FormSource implements SourceInterface
+class FormExtractor implements ExtractorInterface
 {
     /**
      * {@inheritdoc}

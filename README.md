@@ -14,12 +14,12 @@ composer require artyuum/request-dto-mapper-bundle
 
 ## Configuration
 ```yml
-# config/packages/artyuum_request_dto_mapper.yaml
+# config/packages/artyum_request_dto_mapper.yaml
 artyum_request_dto_mapper:
 
-    # Used if the attribute does not specify any (must be a FQCN implementing "\Artyum\RequestDtoMapperBundle\Source\SourceInterface").
-    # e.g. \Artyum\RequestDtoMapperBundle\Source\JsonSource
-    default_source:       ~
+    # Used if the attribute does not specify any (must be a FQCN implementing "\Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface").
+    # e.g. \Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor
+    default_extractor:       ~
 
     # The configuration related to the denormalizer (https://symfony.com/doc/current/components/serializer.html).
     denormalizer:
@@ -65,13 +65,14 @@ class PostPayload {
 ```
 
 2. Inject the DTO into your controller & configure it using the [Dto attribute](/src/Attribute/Dto.php).
+
 ```php
 use Artyum\RequestDtoMapperBundle\Attribute\Dto;
-use Artyum\RequestDtoMapperBundle\Source\JsonSource;
+use Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor;
 
 class PostController extends AbstractController
 {
-    #[Dto(source: JsonSource::class, subject: PostPayload::class, validate: true)]
+    #[Dto(extractor: JsonExtractor::class, subject: PostPayload::class, validate: true)]
     public function __invoke(PostPayload $postPayload): Response
     {
         // At this stage, your DTO has automatically been mapped (from the JSON input) and validated.
@@ -83,7 +84,7 @@ class PostController extends AbstractController
 
 **Alternatively**, you can set the attribute directly on the argument:
 ```php
-public function __invoke(#[Dto(source: JsonSource::class, validate: true)] PostPayload $postPayload): Response
+public function __invoke(#[Dto(extractor: JsonExtractor::class, validate: true)] PostPayload $postPayload): Response
 {
 }
 ```
@@ -93,24 +94,25 @@ public function __invoke(#[Dto(source: JsonSource::class, validate: true)] PostP
 ## Attribute
 The [Dto attribute](src/Attribute/Dto.php) has the following seven properties:
 
-### 1. Source
-The FQCN (Fully-Qualified Class Name) of a class that implements the `SourceInterface`. It basically contains the extraction logic and it's called by the mapper in order to extract the data from the request.
+### 1. Extractor
+The FQCN (Fully-Qualified Class Name) of a class that implements the `ExtractorInterface`. It basically contains the extraction logic and it's called by the mapper in order to extract the data from the request.
 
-The bundle already comes with 5 built-in sources that should meet most of your use-cases:
-- [BodyParameterSource](/src/Source/BodyParameterSource.php) (extracts the data from `$request->request->all()`)
-- [FileSource](/src/Source/FileSource.php) (extracts the data from `$request->files->all()`)
-- [FormSource](/src/Source/FormSource.php) (extracts & merges the data from `$request->request->all()` and `$request->files->all()`)
-- [JsonSource](/src/Source/JsonSource.php) (extracts the data from `$request->toArray()`)
-- [QueryStringSource](/src/Source/QueryStringSource.php) (extracts the data from `$request->query->all()`)
+The bundle already comes with 5 built-in extractors that should meet most of your use-cases:
+- [BodyParameterExtractor](/src/Extractor/BodyParameterExtractor.php) (extracts the data from `$request->request->all()`)
+- [FileExtractor](/src/Extractor/FileExtractor.php) (extracts the data from `$request->files->all()`)
+- [FormExtractor](/src/Extractor/FormExtractor.php) (extracts & merges the data from `$request->request->all()` and `$request->files->all()`)
+- [JsonExtractor](/src/Extractor/JsonExtractor.php) (extracts the data from `$request->toArray()`)
+- [QueryStringExtractor](/src/Extractor/QueryStringExtractor.php) (extracts the data from `$request->query->all()`)
 
-If an error occurs while calling the `extract()` method from the source class, the [SourceExtractionException](src/Exception/SourceExtractionException.php) will be thrown
+If an error occurs while calling the `extract()` method from the extractor class, the [ExtractionFailedException](src/Exception/ExtractionFailedException.php) will be thrown
 
-If these built-in source classes don't meet your needs, you can implement your own source like this:
+If these built-in extractor classes don't meet your needs, you can implement your own extractor like this:
+
 ```php
-use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
+use Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-class CustomSource implements SourceInterface
+class CustomExtractor implements ExtractorInterface
 {
     // you can optionally inject dependencies
     public function __construct() {
@@ -125,13 +127,13 @@ class CustomSource implements SourceInterface
 Then pass it to the `Dto` attribute like this:
 
 ```php
-#[Dto(source: CustomSource::class)]
+#[Dto(extractor: CustomExtractor::class)]
 ```
 
 If you don't set any value, the default value (defined in the bundle's configuration file) will be used.
 
-**Note:** All classes implementing the `SourceInterface` are automatically tagged as "artyum_request_dto_mapper.source",
-and this is needed by the mapper in order to retrieve the needed source class instance from the container.
+**Note:** All classes implementing the `ExtractorInterface` are automatically tagged as "artyum_request_dto_mapper.extractor",
+and this is needed by the mapper in order to retrieve the needed extractor class instance from the container.
 
 ### 2. Subject
 The FQCN (Fully-Qualified Class Name) of the DTO you want to map (it must be present as your controller argument).

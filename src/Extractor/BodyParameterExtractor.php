@@ -1,16 +1,16 @@
 <?php
 
-namespace Artyum\RequestDtoMapperBundle\Source;
+namespace Artyum\RequestDtoMapperBundle\Extractor;
 
 use Symfony\Component\HttpFoundation\Request;
 
-class FileSource implements SourceInterface
+class BodyParameterExtractor implements ExtractorInterface
 {
     /**
      * {@inheritdoc}
      */
     public function extract(Request $request): array
     {
-        return $request->files->all();
+        return $request->request->all();
     }
 }

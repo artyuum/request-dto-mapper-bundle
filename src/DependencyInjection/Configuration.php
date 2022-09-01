@@ -18,8 +18,8 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->scalarNode('default_source')
-                    ->info('Used if the attribute does not specify any (must be a FQCN implementing "\Artyum\RequestDtoMapperBundle\Source\SourceInterface").')
+                ->scalarNode('default_extractor')
+                    ->info('Used if the attribute does not specify any (must be a FQCN implementing "\Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface").')
                     ->defaultNull()
                 ->end()
                 ->arrayNode('denormalizer')

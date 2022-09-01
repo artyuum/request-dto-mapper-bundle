@@ -1,10 +1,10 @@
 <?php
 
-namespace Artyum\RequestDtoMapperBundle\Source;
+namespace Artyum\RequestDtoMapperBundle\Extractor;
 
 use Symfony\Component\HttpFoundation\Request;
 
-interface SourceInterface
+interface ExtractorInterface
 {
     /**
      * Extracts the data from the request.

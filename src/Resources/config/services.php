@@ -2,11 +2,11 @@
 
 use Artyum\RequestDtoMapperBundle\EventListener\ControllerArgumentsEventListener;
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
-use Artyum\RequestDtoMapperBundle\Source\BodyParameterSource;
-use Artyum\RequestDtoMapperBundle\Source\FileSource;
-use Artyum\RequestDtoMapperBundle\Source\FormSource;
-use Artyum\RequestDtoMapperBundle\Source\JsonSource;
-use Artyum\RequestDtoMapperBundle\Source\QueryStringSource;
+use Artyum\RequestDtoMapperBundle\Extractor\BodyParameterExtractor;
+use Artyum\RequestDtoMapperBundle\Extractor\FileExtractor;
+use Artyum\RequestDtoMapperBundle\Extractor\FormExtractor;
+use Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor;
+use Artyum\RequestDtoMapperBundle\Extractor\QueryStringExtractor;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
@@ -33,24 +33,24 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             param('denormalizer'),
             param('validation'),
-            tagged_locator('artyum_request_dto_mapper.source'),
+            tagged_locator('artyum_request_dto_mapper.extractor'),
             service(RequestStack::class),
             service(EventDispatcherInterface::class),
             service(DenormalizerInterface::class),
             service(ValidatorInterface::class)->nullOnInvalid(),
-            param('default_source'),
+            param('default_extractor'),
         ])
 
-        // Sources
-        ->set(BodyParameterSource::class)
-        ->tag('artyum_request_dto_mapper.source')
-        ->set(FileSource::class)
-        ->tag('artyum_request_dto_mapper.source')
-        ->set(FormSource::class)
-        ->tag('artyum_request_dto_mapper.source')
-        ->set(JsonSource::class)
-        ->tag('artyum_request_dto_mapper.source')
-        ->set(QueryStringSource::class)
-        ->tag('artyum_request_dto_mapper.source')
+        // Extractors
+        ->set(BodyParameterExtractor::class)
+            ->tag('artyum_request_dto_mapper.extractor')
+        ->set(FileExtractor::class)
+            ->tag('artyum_request_dto_mapper.extractor')
+        ->set(FormExtractor::class)
+            ->tag('artyum_request_dto_mapper.extractor')
+        ->set(JsonExtractor::class)
+            ->tag('artyum_request_dto_mapper.extractor')
+        ->set(QueryStringExtractor::class)
+            ->tag('artyum_request_dto_mapper.extractor')
     ;
 };

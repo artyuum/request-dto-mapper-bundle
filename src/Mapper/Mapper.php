@@ -9,8 +9,8 @@ use Artyum\RequestDtoMapperBundle\Event\PreDtoMappingEvent;
 use Artyum\RequestDtoMapperBundle\Event\PreDtoValidationEvent;
 use Artyum\RequestDtoMapperBundle\Exception\DtoMappingException;
 use Artyum\RequestDtoMapperBundle\Exception\DtoValidationException;
-use Artyum\RequestDtoMapperBundle\Exception\SourceExtractionException;
-use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
+use Artyum\RequestDtoMapperBundle\Exception\ExtractionFailedException;
+use Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface;
 use LogicException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -26,9 +26,9 @@ class Mapper
 {
     public function __construct(
         private array $denormalizerConfiguration, private array $validationConfiguration,
-        private ServiceLocator $sourceLocator, private RequestStack $requestStack,
+        private ServiceLocator $extractorLocator, private RequestStack $requestStack,
         private EventDispatcherInterface $eventDispatcher, private DenormalizerInterface $denormalizer,
-        private ?ValidatorInterface $validator = null, private ?string $defaultSourceConfiguration = null
+        private ?ValidatorInterface $validator = null, private ?string $defaultExtractorConfiguration = null
     ) {
     }
 
@@ -116,7 +116,7 @@ class Mapper
      * Maps the request data to the DTO.
      *
      * @throws DtoMappingException
-     * @throws SourceExtractionException
+     * @throws ExtractionFailedException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
@@ -126,23 +126,23 @@ class Mapper
 
         $this->eventDispatcher->dispatch(new PreDtoMappingEvent($request, $attribute, $subject));
 
-        $source = $attribute->getSource() ?? $this->defaultSourceConfiguration;
+        $extractor = $attribute->getExtractor() ?? $this->defaultExtractorConfiguration;
 
-        if (!$source) {
-            throw new LogicException('You must set a source either on the attribute or in the configuration file.');
+        if (!$extractor) {
+            throw new LogicException('You must set an extractor either on the attribute or in the configuration file.');
         }
 
-        if (!$this->sourceLocator->has($source)) {
-            throw new LogicException(sprintf('Unable to the find the passed source "%s" in the container. Make sure it\'s tagged as "artyum_request_dto_mapper.source".', $source));
+        if (!$this->extractorLocator->has($extractor)) {
+            throw new LogicException(sprintf('Unable to the find the passed extractor "%s" in the container. Make sure it\'s tagged as "artyum_request_dto_mapper.extractor".', $extractor));
         }
 
-        /** @var SourceInterface $sourceInstance */
-        $sourceInstance = $this->sourceLocator->get($source);
+        /** @var ExtractorInterface $extractorInstance */
+        $extractorInstance = $this->extractorLocator->get($extractor);
 
         try {
-            $data = $sourceInstance->extract($request);
+            $data = $extractorInstance->extract($request);
         } catch (Throwable $throwable) {
-            throw new SourceExtractionException(previous: $throwable);
+            throw new ExtractionFailedException(previous: $throwable);
         }
 
         $denormalizerOptions = $this->getDenormalizerOptions($attribute->getDenormalizerOptions());

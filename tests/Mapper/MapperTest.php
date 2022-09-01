@@ -9,10 +9,10 @@ use Artyum\RequestDtoMapperBundle\Event\PreDtoMappingEvent;
 use Artyum\RequestDtoMapperBundle\Event\PreDtoValidationEvent;
 use Artyum\RequestDtoMapperBundle\Exception\DtoMappingException;
 use Artyum\RequestDtoMapperBundle\Exception\DtoValidationException;
-use Artyum\RequestDtoMapperBundle\Exception\SourceExtractionException;
+use Artyum\RequestDtoMapperBundle\Exception\ExtractionFailedException;
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
-use Artyum\RequestDtoMapperBundle\Source\JsonSource;
-use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
+use Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor;
+use Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -27,13 +27,13 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Tests\Fixtures\Dto\FooDto;
-use Tests\Fixtures\Source\ErroringSource;
+use Tests\Fixtures\Extractor\ErroringExtractor;
 
 class MapperTest extends TestCase
 {
     private function getMapper(
         ?ServiceLocator $serviceLocator = null, ?Request $request = null, ?EventDispatcher $eventDispatcher = null,
-        ?string $defaultSource = null, ?ValidatorInterface $validator = null
+        ?string $defaultExtractor = null, ?ValidatorInterface $validator = null
     ): Mapper {
         $denormalizerConfiguration = [
             'default_options'    => [],
@@ -68,11 +68,11 @@ class MapperTest extends TestCase
             $eventDispatcher,
             $serializer,
             $validator,
-            $defaultSource
+            $defaultExtractor
         );
     }
 
-    public function testItThrowsAnExceptionOnMissingSource(): void
+    public function testItThrowsAnExceptionOnMissingExtractor(): void
     {
         $this->expectException(LogicException::class);
 
@@ -82,7 +82,7 @@ class MapperTest extends TestCase
         ;
     }
 
-    public function testItThrowsAnExceptionOnNonRegisteredSource(): void
+    public function testItThrowsAnExceptionOnNonRegisteredExtractor(): void
     {
         $this->expectException(LogicException::class);
 
@@ -92,7 +92,7 @@ class MapperTest extends TestCase
         ;
     }
 
-    public function testItThrowsAnExceptionOnUnknownSource(): void
+    public function testItThrowsAnExceptionOnUnknownExtractor(): void
     {
         $this->expectException(LogicException::class);
 
@@ -102,27 +102,27 @@ class MapperTest extends TestCase
         ;
     }
 
-    public function testItThrowsAnExceptionOnSourceExtractionFailure(): void
+    public function testItThrowsAnExceptionOnExtractionFailure(): void
     {
-        $this->expectException(SourceExtractionException::class);
+        $this->expectException(ExtractionFailedException::class);
 
         $serviceLocatorMock = $this->createMock(ServiceLocator::class);
         $serviceLocatorMock
             ->expects($this->once())
             ->method('has')
-            ->with(ErroringSource::class)
+            ->with(ErroringExtractor::class)
             ->willReturn(true)
         ;
         $serviceLocatorMock
             ->expects($this->once())
             ->method('get')
-            ->with(ErroringSource::class)
-            ->willReturn(new ErroringSource())
+            ->with(ErroringExtractor::class)
+            ->willReturn(new ErroringExtractor())
         ;
 
         $this
             ->getMapper($serviceLocatorMock)
-            ->map(new Dto(ErroringSource::class, stdClass::class), new stdClass())
+            ->map(new Dto(ErroringExtractor::class, stdClass::class), new stdClass())
         ;
     }
 
@@ -134,14 +134,14 @@ class MapperTest extends TestCase
         $serviceLocatorMock
             ->expects($this->once())
             ->method('has')
-            ->with(JsonSource::class)
+            ->with(JsonExtractor::class)
             ->willReturn(true)
         ;
         $serviceLocatorMock
             ->expects($this->once())
             ->method('get')
-            ->with(JsonSource::class)
-            ->willReturn(new JsonSource())
+            ->with(JsonExtractor::class)
+            ->willReturn(new JsonExtractor())
         ;
 
         /** @var string $json */
@@ -152,18 +152,18 @@ class MapperTest extends TestCase
 
         $this
             ->getMapper($serviceLocatorMock, $request)
-            ->map(new Dto(JsonSource::class, FooDto::class), new FooDto())
+            ->map(new Dto(JsonExtractor::class, FooDto::class), new FooDto())
         ;
     }
 
-    public function testItMapsWithADefaultConfiguredSource(): void
+    public function testItMapsWithADefaultConfiguredExtractor(): void
     {
-        $sourceMock = $this
-            ->getMockBuilder(SourceInterface::class)
+        $extractorMock = $this
+            ->getMockBuilder(ExtractorInterface::class)
             ->getMock()
         ;
 
-        $sourceMock->method('extract')->willReturn(['foo' => 'bar']);
+        $extractorMock->method('extract')->willReturn(['foo' => 'bar']);
 
         $serviceLocatorMock = $this->createMock(ServiceLocator::class);
 
@@ -177,17 +177,17 @@ class MapperTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(stdClass::class)
-            ->willReturn($sourceMock)
+            ->willReturn($extractorMock)
         ;
 
         $serviceLocatorMock->method('has')->willReturn(true);
-        $serviceLocatorMock->method('get')->willReturn($sourceMock);
+        $serviceLocatorMock->method('get')->willReturn($extractorMock);
 
         $dto = new stdClass();
         $dto->foo = null;
 
         $this
-            ->getMapper($serviceLocatorMock, defaultSource: SourceInterface::class)
+            ->getMapper($serviceLocatorMock, defaultExtractor: ExtractorInterface::class)
             ->map(new Dto(stdClass::class), $dto)
         ;
 
@@ -196,12 +196,12 @@ class MapperTest extends TestCase
 
     public function testItDispatchesTheMappingRelatedEvents(): void
     {
-        $sourceMock = $this
-            ->getMockBuilder(SourceInterface::class)
+        $extractorMock = $this
+            ->getMockBuilder(ExtractorInterface::class)
             ->getMock()
         ;
 
-        $sourceMock->method('extract')->willReturn([]);
+        $extractorMock->method('extract')->willReturn([]);
 
         $serviceLocatorMock = $this->createMock(ServiceLocator::class);
 
@@ -216,7 +216,7 @@ class MapperTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(stdClass::class)
-            ->willReturn($sourceMock)
+            ->willReturn($extractorMock)
         ;
 
         $eventDispatcherMock = $this->createMock(EventDispatcher::class);

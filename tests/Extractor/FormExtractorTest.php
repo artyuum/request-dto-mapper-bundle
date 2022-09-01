@@ -1,28 +1,28 @@
 <?php
 
-namespace Tests\Source;
+namespace Tests\Extractor;
 
-use Artyum\RequestDtoMapperBundle\Source\FormSource;
-use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
+use Artyum\RequestDtoMapperBundle\Extractor\FormExtractor;
+use Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 
-class FormSourceTest extends TestCase
+class FormExtractorTest extends TestCase
 {
     public function testInterface(): void
     {
-        self::assertInstanceOf(SourceInterface::class, new FormSource());
+        self::assertInstanceOf(ExtractorInterface::class, new FormExtractor());
     }
 
-    public function testRequestDataExtraction(): void
+    public function testExtraction(): void
     {
         $request = new Request(
             request: ['key' => 'value'],
             files: ['file' => new UploadedFile(path: __DIR__ . '/Fixture/sample.txt', originalName: 'sample', test: true)]
         );
-        $source = new FormSource();
-        $extractedData = $source->extract($request);
+        $extractor = new FormExtractor();
+        $extractedData = $extractor->extract($request);
         $expectedData = [
             'key'  => 'value',
             'file' => new UploadedFile(path: __DIR__ . '/Fixture/sample.txt', originalName: 'sample', test: true),

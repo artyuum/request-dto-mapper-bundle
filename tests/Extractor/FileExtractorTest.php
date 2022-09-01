@@ -1,29 +1,29 @@
 <?php
 
-namespace Tests\Source;
+namespace Tests\Extractor;
 
-use Artyum\RequestDtoMapperBundle\Source\FileSource;
-use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
+use Artyum\RequestDtoMapperBundle\Extractor\FileExtractor;
+use Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 
-class FileSourceTest extends TestCase
+class FileExtractorTest extends TestCase
 {
     public function testInterface(): void
     {
-        self::assertInstanceOf(SourceInterface::class, new FileSource());
+        self::assertInstanceOf(ExtractorInterface::class, new FileExtractor());
     }
 
-    public function testRequestDataExtraction(): void
+    public function testExtraction(): void
     {
         $expectedData = [
             new UploadedFile(path: __DIR__ . '/Fixture/sample.txt', originalName: 'sample', test: true),
         ];
         $request = new Request(files: $expectedData);
-        $source = new FileSource();
+        $extractor = new FileExtractor();
 
-        $extractedData = $source->extract($request);
+        $extractedData = $extractor->extract($request);
 
         self::assertSame($expectedData, $extractedData);
     }

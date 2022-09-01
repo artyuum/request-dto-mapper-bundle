@@ -8,19 +8,19 @@ use Attribute;
 class Dto
 {
     public function __construct(
-        private ?string $source = null, private ?string $subject = null, private array $methods = [], private array $denormalizerOptions = [],
-        private ?bool $validate = null, private array $validationGroups = [], private ?bool $throwOnViolation = null
+        private ?string $extractor = null, private ?string $subject = null, private array $methods = [], private array $denormalizerOptions = [],
+        private ?bool   $validate = null, private array $validationGroups = [], private ?bool $throwOnViolation = null
     ) {
     }
 
-    public function getSource(): ?string
+    public function getExtractor(): ?string
     {
-        return $this->source;
+        return $this->extractor;
     }
 
-    public function setSource(?string $source): void
+    public function setExtractor(?string $extractor): void
     {
-        $this->source = $source;
+        $this->extractor = $extractor;
     }
 
     public function getSubject(): ?string

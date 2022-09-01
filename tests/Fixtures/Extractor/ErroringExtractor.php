@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Fixtures\Source;
+namespace Tests\Fixtures\Extractor;
 
-use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
+use Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
 
-class ErroringSource implements SourceInterface
+class ErroringExtractor implements ExtractorInterface
 {
     /**
      * {@inheritDoc}

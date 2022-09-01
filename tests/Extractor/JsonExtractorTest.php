@@ -1,20 +1,20 @@
 <?php
 
-namespace Tests\Source;
+namespace Tests\Extractor;
 
-use Artyum\RequestDtoMapperBundle\Source\JsonSource;
-use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
+use Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor;
+use Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
-class JsonSourceTest extends TestCase
+class JsonExtractorTest extends TestCase
 {
     public function testInterface(): void
     {
-        self::assertInstanceOf(SourceInterface::class, new JsonSource());
+        self::assertInstanceOf(ExtractorInterface::class, new JsonExtractor());
     }
 
-    public function testRequestDataExtraction(): void
+    public function testExtraction(): void
     {
         $expectedData = [
             'key' => 'value',
@@ -22,9 +22,9 @@ class JsonSourceTest extends TestCase
         /** @var string $content */
         $content = json_encode($expectedData);
         $request = new Request(content: $content);
-        $source = new JsonSource();
+        $extractor = new JsonExtractor();
 
-        $extractedData = $source->extract($request);
+        $extractedData = $extractor->extract($request);
 
         self::assertSame($expectedData, $extractedData);
     }

@@ -8,7 +8,7 @@ use Throwable;
 /**
  * Thrown when the extraction of the request data failed.
  */
-class SourceExtractionException extends Exception
+class ExtractionFailedException extends Exception
 {
     public function __construct(string $message = 'Failed to extract the request data.', int $code = 0, ?Throwable $previous = null)
     {

@@ -3,7 +3,7 @@
 namespace Artyum\RequestDtoMapperBundle\DependencyInjection;
 
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
-use Artyum\RequestDtoMapperBundle\Source\SourceInterface;
+use Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
@@ -20,14 +20,14 @@ class ArtyumRequestDtoMapperExtension extends ConfigurableExtension
         $loader->load('services.php');
 
         $container
-            ->registerForAutoconfiguration(SourceInterface::class)
-            ->addTag('artyum_request_dto_mapper.source')
+            ->registerForAutoconfiguration(ExtractorInterface::class)
+            ->addTag('artyum_request_dto_mapper.extractor')
         ;
 
         $container->getDefinition(Mapper::class)
             ->replaceArgument(0, $mergedConfig['denormalizer'])
             ->replaceArgument(1, $mergedConfig['validation'])
-            ->replaceArgument(7, $mergedConfig['default_source'])
+            ->replaceArgument(7, $mergedConfig['default_extractor'])
         ;
     }
 }

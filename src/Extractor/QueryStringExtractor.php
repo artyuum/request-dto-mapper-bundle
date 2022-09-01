@@ -1,16 +1,16 @@
 <?php
 
-namespace Artyum\RequestDtoMapperBundle\Source;
+namespace Artyum\RequestDtoMapperBundle\Extractor;
 
 use Symfony\Component\HttpFoundation\Request;
 
-class JsonSource implements SourceInterface
+class QueryStringExtractor implements ExtractorInterface
 {
     /**
      * {@inheritdoc}
      */
     public function extract(Request $request): array
     {
-        return $request->toArray();
+        return $request->query->all();
     }
 }
