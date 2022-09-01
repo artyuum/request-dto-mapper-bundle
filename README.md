@@ -18,8 +18,7 @@ composer require artyuum/request-dto-mapper-bundle
 artyum_request_dto_mapper:
 
     # Used if the attribute does not specify any (must be a FQCN implementing "\Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface").
-    # e.g. \Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor
-    default_extractor:       ~
+    default_extractor:    null # Example: \Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor
 
     # The configuration related to the denormalizer (https://symfony.com/doc/current/components/serializer.html).
     denormalizer:
