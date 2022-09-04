@@ -26,9 +26,9 @@ class ControllerArgumentsEventListenerTest extends TestCase
         $event = new ControllerArgumentsEvent(
             $this->createMock(HttpKernelInterface::class),
             [new Controller(), 'controllerNotUsingTheAttribute'],
-            [new stdClass()],
+            [],
             new Request(),
-            HttpKernelInterface::MAIN_REQUEST // or null?
+            null
         );
 
         $mapperMock = $this->createMock(Mapper::class);
@@ -41,23 +41,40 @@ class ControllerArgumentsEventListenerTest extends TestCase
         $listener->onKernelControllerArguments($event);
     }
 
-    public function testItThrowsAnExceptionWhenTheSubjectCouldNotBeFound(): void
+    public function testItThrowsAnExceptionWhenTheAttributeIsUsedWithoutAKnownSubject(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage(sprintf('When used as a method attribute, you must set the $subject argument on the %s attribute.',Dto::class));
 
         $event = new ControllerArgumentsEvent(
             $this->createMock(HttpKernelInterface::class),
-            [new Controller(), 'subjectNotPresentInArgument'],
-            [new stdClass()],
+            [new Controller(), 'attributeDoesNotHaveAKnownSubject'],
+            [],
             new Request(),
-            HttpKernelInterface::MAIN_REQUEST // or null?
+            null
         );
 
         $mapperMock = $this->createMock(Mapper::class);
 
-        $mapperMock->expects(self::never())->method('map');
-        $mapperMock->expects(self::never())->method('validate');
+        $listener = new ControllerArgumentsEventListener($mapperMock);
+
+        $listener->onKernelControllerArguments($event);
+    }
+
+    public function testItThrowsAnExceptionWhenTheSubjectIsNotFound(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(sprintf('The subject (%s) was not found in the controller arguments.', stdClass::class));
+
+        $event = new ControllerArgumentsEvent(
+            $this->createMock(HttpKernelInterface::class),
+            [new Controller(), 'subjectIsNotFound'],
+            [],
+            new Request(),
+            null,
+        );
+
+        $mapperMock = $this->createMock(Mapper::class);
 
         $listener = new ControllerArgumentsEventListener($mapperMock);
 
