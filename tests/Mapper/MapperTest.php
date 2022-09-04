@@ -211,14 +211,14 @@ class MapperTest extends TestCase
         $serviceLocatorMock = $this->createMock(ServiceLocator::class);
 
         $serviceLocatorMock
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('has')
             ->with(stdClass::class)
             ->willReturn(true)
         ;
 
         $serviceLocatorMock
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('get')
             ->with(stdClass::class)
             ->willReturn($extractorMock)
@@ -227,7 +227,7 @@ class MapperTest extends TestCase
         $eventDispatcherMock = $this->createMock(EventDispatcher::class);
 
         $eventDispatcherMock
-            ->expects($this->exactly(2))
+            ->expects(self::exactly(2))
             ->method('dispatch')
             ->withConsecutive(
                 [$this->isInstanceOf(PreDtoMappingEvent::class)],
@@ -270,7 +270,7 @@ class MapperTest extends TestCase
     public function testItDispatchesTheValidationRelatedEvents(): void
     {
         $eventDispatcherMock = $this->createMock(EventDispatcher::class);
-        $eventDispatcherMock->expects($this->exactly(2))
+        $eventDispatcherMock->expects(self::exactly(2))
             ->method('dispatch')
             ->withConsecutive(
                 [$this->isInstanceOf(PreDtoValidationEvent::class)],
@@ -289,6 +289,7 @@ class MapperTest extends TestCase
     public function testItThrowsAnExceptionOnConstraintViolations(): void
     {
         $this->expectException(DtoValidationException::class);
+        $this->expectExceptionMessage('There is one or more constraint violations for the passed DTO.');
 
         $validatorMock = $this->createMock(ValidatorInterface::class);
         $validatorMock
