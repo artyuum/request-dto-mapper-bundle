@@ -75,6 +75,7 @@ class MapperTest extends TestCase
     public function testItThrowsAnExceptionOnMissingExtractor(): void
     {
         $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(sprintf('Unable to the find the passed extractor "%s" in the container. Make sure it\'s tagged as "artyum_request_dto_mapper.extractor".', stdClass::class));
 
         $this
             ->getMapper()
@@ -85,6 +86,7 @@ class MapperTest extends TestCase
     public function testItThrowsAnExceptionOnNonRegisteredExtractor(): void
     {
         $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(sprintf('Unable to the find the passed extractor "%s" in the container. Make sure it\'s tagged as "artyum_request_dto_mapper.extractor".', stdClass::class));
 
         $this
             ->getMapper()
@@ -95,6 +97,7 @@ class MapperTest extends TestCase
     public function testItThrowsAnExceptionOnUnknownExtractor(): void
     {
         $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('You must set an extractor either on the attribute or in the configuration file.');
 
         $this
             ->getMapper()
@@ -105,6 +108,7 @@ class MapperTest extends TestCase
     public function testItThrowsAnExceptionOnExtractionFailure(): void
     {
         $this->expectException(ExtractionFailedException::class);
+        $this->expectExceptionMessage('Failed to extract the request data.');
 
         $serviceLocatorMock = $this->createMock(ServiceLocator::class);
         $serviceLocatorMock
@@ -129,6 +133,7 @@ class MapperTest extends TestCase
     public function testItThrowsAnExceptionOnMappingFailure(): void
     {
         $this->expectException(DtoMappingException::class);
+        $this->expectExceptionMessage('Failed to map the extracted request data to the DTO.');
 
         $serviceLocatorMock = $this->createMock(ServiceLocator::class);
         $serviceLocatorMock
@@ -191,7 +196,7 @@ class MapperTest extends TestCase
             ->map(new Dto(stdClass::class), $dto)
         ;
 
-        $this->assertSame($dto->foo, 'bar');
+        self::assertSame($dto->foo, 'bar');
     }
 
     public function testItDispatchesTheMappingRelatedEvents(): void
@@ -239,6 +244,7 @@ class MapperTest extends TestCase
     public function testItThrowsAnExceptionIfTheValidatorIsNotInstalled(): void
     {
         $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('You cannot validate the DTO if the "validator" component is not available. Try running "composer require symfony/validator".');
 
         $this
             ->getMapper()
@@ -330,6 +336,6 @@ class MapperTest extends TestCase
             ->validate(new Dto(stdClass::class, validate: true, throwOnViolation: false), new stdClass())
         ;
 
-        $this->assertSame($constraintViolationList, $request->attributes->get('_constraint_violations'));
+        self::assertSame($constraintViolationList, $request->attributes->get('_constraint_violations'));
     }
 }
