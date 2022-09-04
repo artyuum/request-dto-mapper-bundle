@@ -3,8 +3,8 @@
 namespace Artyum\RequestDtoMapperBundle\EventListener;
 
 use Artyum\RequestDtoMapperBundle\Attribute\Dto;
-use Artyum\RequestDtoMapperBundle\Exception\DtoMappingException;
-use Artyum\RequestDtoMapperBundle\Exception\DtoValidationException;
+use Artyum\RequestDtoMapperBundle\Exception\DtoMappingFailedException;
+use Artyum\RequestDtoMapperBundle\Exception\DtoValidationFailedException;
 use Artyum\RequestDtoMapperBundle\Exception\ExtractionFailedException;
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
 use LogicException;
@@ -115,8 +115,8 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
 
     /**
      * @throws ReflectionException
-     * @throws DtoMappingException
-     * @throws DtoValidationException
+     * @throws DtoMappingFailedException
+     * @throws DtoValidationFailedException
      * @throws ExtractionFailedException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface

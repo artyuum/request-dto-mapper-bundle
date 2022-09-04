@@ -9,7 +9,7 @@ use Throwable;
 /**
  * Thrown when the DTO validation failed.
  */
-class DtoValidationException extends Exception
+class DtoValidationFailedException extends Exception
 {
     private ConstraintViolationListInterface $violations;
 

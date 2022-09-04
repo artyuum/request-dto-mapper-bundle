@@ -173,7 +173,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 #[Dto(denormalizerOptions: [ObjectNormalizer::DISABLE_TYPE_ENFORCEMENT => true])]
 ```
 
-If an error occurs while calling the `denormalize()` method from the Denormalizer, the [DtoMappingException](src/Exception/DtoMappingException.php) will be thrown.
+If an error occurs while calling the `denormalize()` method from the Denormalizer, the [DtoMappingException](src/Exception/DtoMappingFailedException.php) will be thrown.
 
 ### 5. Validate
 Whether to validate the DTO (once the mapping is done). Internally, the [validator component](https://symfony.com/doc/current/validation.html) will be used, and if you do not have it installed a `LogicException` will be thrown.
@@ -196,7 +196,7 @@ Example:
 If you don't set any value, the configured value (defined in the bundle's configuration file) will be used.
 
 ### 7. Throw on violation
-If the validation failed (due to the constraint violations), the [DtoValidationException](/src/Exception/DtoValidationException.php) will be thrown, and you will be able to get a list of these violations by calling the `getViolations()` method.
+If the validation failed (due to the constraint violations), the [DtoValidationException](/src/Exception/DtoValidationFailedException.php) will be thrown, and you will be able to get a list of these violations by calling the `getViolations()` method.
 
 Additionally, the constraint violations will be available as request attribute:
 ```php

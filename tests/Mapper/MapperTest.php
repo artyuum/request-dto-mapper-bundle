@@ -7,8 +7,8 @@ use Artyum\RequestDtoMapperBundle\Event\PostDtoMappingEvent;
 use Artyum\RequestDtoMapperBundle\Event\PostDtoValidationEvent;
 use Artyum\RequestDtoMapperBundle\Event\PreDtoMappingEvent;
 use Artyum\RequestDtoMapperBundle\Event\PreDtoValidationEvent;
-use Artyum\RequestDtoMapperBundle\Exception\DtoMappingException;
-use Artyum\RequestDtoMapperBundle\Exception\DtoValidationException;
+use Artyum\RequestDtoMapperBundle\Exception\DtoMappingFailedException;
+use Artyum\RequestDtoMapperBundle\Exception\DtoValidationFailedException;
 use Artyum\RequestDtoMapperBundle\Exception\ExtractionFailedException;
 use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
 use Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor;
@@ -132,7 +132,7 @@ class MapperTest extends TestCase
 
     public function testItThrowsAnExceptionOnMappingFailure(): void
     {
-        $this->expectException(DtoMappingException::class);
+        $this->expectException(DtoMappingFailedException::class);
         $this->expectExceptionMessage('Failed to map the extracted request data to the DTO.');
 
         $serviceLocatorMock = $this->createMock(ServiceLocator::class);
@@ -288,7 +288,7 @@ class MapperTest extends TestCase
 
     public function testItThrowsAnExceptionOnConstraintViolations(): void
     {
-        $this->expectException(DtoValidationException::class);
+        $this->expectException(DtoValidationFailedException::class);
         $this->expectExceptionMessage('There is one or more constraint violations for the passed DTO.');
 
         $validatorMock = $this->createMock(ValidatorInterface::class);

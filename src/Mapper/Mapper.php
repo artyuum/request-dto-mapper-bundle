@@ -7,8 +7,8 @@ use Artyum\RequestDtoMapperBundle\Event\PostDtoMappingEvent;
 use Artyum\RequestDtoMapperBundle\Event\PostDtoValidationEvent;
 use Artyum\RequestDtoMapperBundle\Event\PreDtoMappingEvent;
 use Artyum\RequestDtoMapperBundle\Event\PreDtoValidationEvent;
-use Artyum\RequestDtoMapperBundle\Exception\DtoMappingException;
-use Artyum\RequestDtoMapperBundle\Exception\DtoValidationException;
+use Artyum\RequestDtoMapperBundle\Exception\DtoMappingFailedException;
+use Artyum\RequestDtoMapperBundle\Exception\DtoValidationFailedException;
 use Artyum\RequestDtoMapperBundle\Exception\ExtractionFailedException;
 use Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface;
 use LogicException;
@@ -75,7 +75,7 @@ class Mapper
     /**
      * Validates the subject (already mapped DTO).
      *
-     * @throws DtoValidationException
+     * @throws DtoValidationFailedException
      */
     public function validate(Dto $attribute, object $subject): void
     {
@@ -105,7 +105,7 @@ class Mapper
             }
 
             if ($canThrowOnViolation) {
-                throw new DtoValidationException($errors);
+                throw new DtoValidationFailedException($errors);
             }
         }
 
@@ -115,7 +115,7 @@ class Mapper
     /**
      * Maps the request data to the DTO.
      *
-     * @throws DtoMappingException
+     * @throws DtoMappingFailedException
      * @throws ExtractionFailedException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
@@ -151,7 +151,7 @@ class Mapper
         try {
             $this->denormalizer->denormalize($data, $subject::class, null, $denormalizerOptions);
         } catch (Throwable $throwable) {
-            throw new DtoMappingException(previous: $throwable);
+            throw new DtoMappingFailedException(previous: $throwable);
         }
 
         $this->eventDispatcher->dispatch(new PostDtoMappingEvent($request, $attribute, $subject));
