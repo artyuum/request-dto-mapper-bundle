@@ -16,7 +16,7 @@ use Tests\Fixtures\Controller\Controller;
 
 class ControllerArgumentsEventListenerTest extends TestCase
 {
-    public function testGetSubscribedEvents(): void
+    public function testItSubscribesToTheRightEvent(): void
     {
         self::assertArrayHasKey(KernelEvents::CONTROLLER_ARGUMENTS, ControllerArgumentsEventListener::getSubscribedEvents());
     }

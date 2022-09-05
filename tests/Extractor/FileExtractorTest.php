@@ -10,12 +10,12 @@ use Symfony\Component\HttpFoundation\Request;
 
 class FileExtractorTest extends TestCase
 {
-    public function testInterface(): void
+    public function testItImplementsTheRightInterface(): void
     {
         self::assertInstanceOf(ExtractorInterface::class, new FileExtractor());
     }
 
-    public function testExtraction(): void
+    public function testItExtractsData(): void
     {
         $expectedData = [
             new UploadedFile(path: __DIR__ . '/Fixture/sample.txt', originalName: 'sample', test: true),

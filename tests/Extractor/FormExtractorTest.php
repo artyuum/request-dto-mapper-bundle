@@ -10,12 +10,12 @@ use Symfony\Component\HttpFoundation\Request;
 
 class FormExtractorTest extends TestCase
 {
-    public function testInterface(): void
+    public function testItImplementsTheRightInterface(): void
     {
         self::assertInstanceOf(ExtractorInterface::class, new FormExtractor());
     }
 
-    public function testExtraction(): void
+    public function testItExtractsData(): void
     {
         $request = new Request(
             request: ['key' => 'value'],

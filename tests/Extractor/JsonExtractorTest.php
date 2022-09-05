@@ -9,12 +9,12 @@ use Symfony\Component\HttpFoundation\Request;
 
 class JsonExtractorTest extends TestCase
 {
-    public function testInterface(): void
+    public function testItImplementsTheRightInterface(): void
     {
         self::assertInstanceOf(ExtractorInterface::class, new JsonExtractor());
     }
 
-    public function testExtraction(): void
+    public function testItExtractsData(): void
     {
         $expectedData = [
             'key' => 'value',
