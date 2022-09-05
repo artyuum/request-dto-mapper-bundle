@@ -33,8 +33,8 @@ class ControllerArgumentsEventListenerTest extends TestCase
 
         $mapperMock = $this->createMock(Mapper::class);
 
-        $mapperMock->expects($this->never())->method('map');
-        $mapperMock->expects($this->never())->method('validate');
+        $mapperMock->expects(self::never())->method('map');
+        $mapperMock->expects(self::never())->method('validate');
 
         $listener = new ControllerArgumentsEventListener($mapperMock);
 

@@ -16,6 +16,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -87,6 +88,7 @@ class Mapper
             throw new LogicException('You cannot validate the DTO if the "validator" component is not available. Try running "composer require symfony/validator".');
         }
 
+        /** @var Request $request */
         $request = $this->requestStack->getMainRequest();
 
         $this->eventDispatcher->dispatch(new PreDtoValidationEvent($request, $attribute, $subject));
@@ -122,6 +124,7 @@ class Mapper
      */
     public function map(Dto $attribute, object $subject): void
     {
+        /** @var Request $request */
         $request = $this->requestStack->getMainRequest();
 
         $this->eventDispatcher->dispatch(new PreDtoMappingEvent($request, $attribute, $subject));
