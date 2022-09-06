@@ -131,7 +131,7 @@ Then pass it to the `Dto` attribute like this:
 
 If you don't set any value, the default value (defined in the bundle's configuration file) will be used.
 
-**Note:** All classes implementing the `ExtractorInterface` are automatically tagged as "artyum_request_dto_mapper.extractor",
+**Note:** All classes implementing `ExtractorInterface` are automatically tagged as "artyum_request_dto_mapper.extractor",
 and this is needed by the mapper in order to retrieve the needed extractor class instance from the container.
 
 ### 2. Subject
