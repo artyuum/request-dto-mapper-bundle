@@ -69,7 +69,7 @@ class PostPayload {
 use Artyum\RequestDtoMapperBundle\Attribute\Dto;
 use Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor;
 
-class PostController extends AbstractController
+class CreatePostController extends AbstractController
 {
     #[Dto(extractor: JsonExtractor::class, subject: PostPayload::class, validate: true)]
     public function __invoke(PostPayload $postPayload): Response
@@ -156,10 +156,14 @@ public function __invoke(#[Dto] PostPayload $postPayload): Response
 This is a shorter way of marking an argument that will be handled by this bundle, but if you have to set many options on the attribute, it's recommended to set the attribute on the method instead.
 
 ### 3. Methods
-It can contain an array of HTTP methods that will "enable" the mapping/validation depending on the current HTTP method. In the following example, the DTO will be mapped & validated only if the request method is "GET".
+It can contain a single or an array of HTTP methods that will "enable" the mapping/validation depending on the current HTTP method. In the following example, the DTO will be mapped & validated only if the request method is "GET".
+```php
+#[Dto(methods: 'GET')]
+``` 
+or
 ```php
 #[Dto(methods: ['GET'])]
-``` 
+```
 
 If the array is empty (this is the default value), the mapper will always map the DTO and validate it.
 
@@ -173,7 +177,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 #[Dto(denormalizerOptions: [ObjectNormalizer::DISABLE_TYPE_ENFORCEMENT => true])]
 ```
 
-If an error occurs while calling the `denormalize()` method from the Denormalizer, the [DtoMappingException](src/Exception/DtoMappingFailedException.php) will be thrown.
+If an error occurs while calling the `denormalize()` method from the Denormalizer, the [DtoMappingFailedException](src/Exception/DtoMappingFailedException.php) will be thrown.
 
 ### 5. Validate
 Whether to validate the DTO (once the mapping is done). Internally, the [validator component](https://symfony.com/doc/current/validation.html) will be used, and if you do not have it installed a `LogicException` will be thrown.
@@ -196,7 +200,7 @@ Example:
 If you don't set any value, the configured value (defined in the bundle's configuration file) will be used.
 
 ### 7. Throw on violation
-If the validation failed (due to the constraint violations), the [DtoValidationException](/src/Exception/DtoValidationFailedException.php) will be thrown, and you will be able to get a list of these violations by calling the `getViolations()` method.
+If the validation failed (due to the constraint violations), the [DtoValidationFailedException](/src/Exception/DtoValidationFailedException.php) will be thrown, and you will be able to get a list of these violations by calling the `getViolations()` method.
 
 Additionally, the constraint violations will be available as request attribute:
 ```php
