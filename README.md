@@ -1,5 +1,5 @@
 # Request DTO Mapper Bundle
-![image](https://user-images.githubusercontent.com/17199757/179373257-d4b8af44-4b14-402f-a6ff-bf0131029e1f.png)
+![image](https://user-images.githubusercontent.com/17199757/192020579-8bcbc448-9917-460a-8aca-2fe78e982146.png)
 
 This bundle provides an easy way to automatically map the incoming request data to a DTO and optionally validate it. It's using the powerful [Serializer](https://symfony.com/doc/current/components/serializer.html) component under the hood along with the [Validator](https://symfony.com/doc/current/components/validator.html) component (optional).
 
