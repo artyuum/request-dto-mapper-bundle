@@ -8,9 +8,10 @@ use Attribute;
 class Dto
 {
     public function __construct(
-        private ?string $extractor = null, private ?string $subject = null, private array $methods = [], private array $denormalizerOptions = [],
+        private ?string $extractor = null, private ?string $subject = null, private array|string $methods = [], private array $denormalizerOptions = [],
         private ?bool   $validate = null, private array $validationGroups = [], private ?bool $throwOnViolation = null
     ) {
+        $this->methods = is_array($methods) ? $methods : [$methods];
     }
 
     public function getExtractor(): ?string
@@ -38,9 +39,9 @@ class Dto
         return $this->methods;
     }
 
-    public function setMethods(array $methods): void
+    public function setMethods(array|string $methods): void
     {
-        $this->methods = $methods;
+        $this->methods = is_array($methods) ? $methods : [$methods];
     }
 
     public function getDenormalizerOptions(): array
