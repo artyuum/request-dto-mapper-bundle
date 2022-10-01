@@ -18,31 +18,31 @@ composer require artyuum/request-dto-mapper-bundle
 artyum_request_dto_mapper:
 
     # Used if the attribute does not specify any (must be a FQCN implementing "\Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface").
-    default_extractor:    null # Example: \Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor
+    default_extractor: null # Example: Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor
 
     # The configuration related to the denormalizer (https://symfony.com/doc/current/components/serializer.html).
     denormalizer:
 
         # Used when mapping the request data to the DTO if the attribute does not set any.
-        default_options:      []
+        default_options: []
 
         # Used when mapping the request data to the DTO (merged with the values passed by the attribute or "default_options").
-        additional_options:   []
+        additional_options: []
 
     # The configuration related to the validator (https://symfony.com/doc/current/validation.html).
     validation:
 
         # Whether to validate the DTO after mapping it.
-        enabled:              false
+        enabled: false
 
         # Used when validating the DTO if the attribute does not set any.
-        default_groups:       []
+        default_groups: []
 
         # Used when validating the DTO (merged with the values passed by the attribute or "default_groups").
-        additional_groups:    []
+        additional_groups: []
 
         # Whether to throw an exception if the DTO validation failed (constraint violations).
-        throw_on_violation:   true
+        throw_on_violation: true
 ```
 
 ## Usage
@@ -81,7 +81,7 @@ class CreatePostController extends AbstractController
 }
 ```
 
-**Alternatively**, you can set the attribute directly on the argument:
+**Alternatively**, you can set the attribute directly on the argument (assuming you have set the default values in the configuration file):
 ```php
 public function __invoke(#[Dto(extractor: JsonExtractor::class, validate: true)] PostPayload $postPayload): Response
 {
@@ -98,8 +98,6 @@ The FQCN (Fully-Qualified Class Name) of a class that implements the `ExtractorI
 
 The bundle already comes with 5 built-in extractors that should meet most of your use-cases:
 - [BodyParameterExtractor](/src/Extractor/BodyParameterExtractor.php) (extracts the data from `$request->request->all()`)
-- [FileExtractor](/src/Extractor/FileExtractor.php) (extracts the data from `$request->files->all()`)
-- [FormExtractor](/src/Extractor/FormExtractor.php) (extracts & merges the data from `$request->request->all()` and `$request->files->all()`)
 - [JsonExtractor](/src/Extractor/JsonExtractor.php) (extracts the data from `$request->toArray()`)
 - [QueryStringExtractor](/src/Extractor/QueryStringExtractor.php) (extracts the data from `$request->query->all()`)
 
