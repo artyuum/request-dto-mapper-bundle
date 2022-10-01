@@ -20,7 +20,7 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->scalarNode('default_extractor')
                     ->info('Used if the attribute does not specify any (must be a FQCN implementing "\Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface").')
-                    ->example('\Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor')
+                    ->example('Artyum\RequestDtoMapperBundle\Extractor\JsonExtractor')
                     ->defaultNull()
                 ->end()
                 ->arrayNode('denormalizer')
