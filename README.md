@@ -81,9 +81,16 @@ class CreatePostController extends AbstractController
 }
 ```
 
-**Alternatively**, you can set the attribute directly on the argument (assuming you have set the default values in the configuration file):
+**Alternatively**, you can set the attribute directly on the argument:
 ```php
 public function __invoke(#[Dto(extractor: JsonExtractor::class, validate: true)] PostPayload $postPayload): Response
+{
+}
+```
+
+If you have set some default options in the configuration file (the default extractor to use, whether to enable the validation), you can even make it shorter:
+```php
+public function __invoke(#[Dto] PostPayload $postPayload): Response
 {
 }
 ```
