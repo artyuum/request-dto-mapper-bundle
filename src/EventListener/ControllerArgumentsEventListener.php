@@ -57,6 +57,8 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
 
     /**
      * Extracts the Dto subjects from the passed ReflectionMethod.
+     *
+     * @return array<string, array<Dto>>
      */
     private function extractFromMethod(ReflectionMethod $reflectionMethod): array
     {
