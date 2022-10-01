@@ -44,10 +44,6 @@ return static function (ContainerConfigurator $container): void {
         // Extractors
         ->set(BodyParameterExtractor::class)
             ->tag('artyum_request_dto_mapper.extractor')
-        ->set(FileExtractor::class)
-            ->tag('artyum_request_dto_mapper.extractor')
-        ->set(FormExtractor::class)
-            ->tag('artyum_request_dto_mapper.extractor')
         ->set(JsonExtractor::class)
             ->tag('artyum_request_dto_mapper.extractor')
         ->set(QueryStringExtractor::class)
