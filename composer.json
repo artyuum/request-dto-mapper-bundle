@@ -11,7 +11,8 @@
     ],
     "type": "symfony-bundle",
     "require": {
-        "php": "^8.0",
+        "php": ">=8.0",
+        "phpdocumentor/reflection-docblock": "^5.3",
         "symfony/config": "^5.0 || ^6.0",
         "symfony/event-dispatcher": "^5.0 || ^6.0",
         "symfony/framework-bundle": "^5.0 || ^6.0",
@@ -26,7 +27,7 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Artyum Petrov",
+            "name": "Dynèsh HASSANALY",
             "email": "artyum@protonmail.com"
         }
     ],
