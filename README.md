@@ -103,12 +103,12 @@ The [Dto attribute](src/Attribute/Dto.php) has the following seven properties:
 ### 1. Extractor
 The FQCN (Fully-Qualified Class Name) of a class that implements the `ExtractorInterface`. It basically contains the extraction logic and it's called by the mapper in order to extract the data from the request.
 
-The bundle already comes with 5 built-in extractors that should meet most of your use-cases:
+The bundle already comes with 3 built-in extractors that should meet most of your use-cases:
 - [BodyParameterExtractor](/src/Extractor/BodyParameterExtractor.php) (extracts the data from `$request->request->all()`)
 - [JsonExtractor](/src/Extractor/JsonExtractor.php) (extracts the data from `$request->toArray()`)
 - [QueryStringExtractor](/src/Extractor/QueryStringExtractor.php) (extracts the data from `$request->query->all()`)
 
-If an error occurs while calling the `extract()` method from the extractor class, the [ExtractionFailedException](src/Exception/ExtractionFailedException.php) will be thrown
+If an error occurs when the `extract()` method is called from the extractor class, the [ExtractionFailedException](src/Exception/ExtractionFailedException.php) will be thrown.
 
 If these built-in extractor classes don't meet your needs, you can implement your own extractor like this:
 
@@ -182,7 +182,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 #[Dto(denormalizerOptions: [ObjectNormalizer::DISABLE_TYPE_ENFORCEMENT => true])]
 ```
 
-If an error occurs while calling the `denormalize()` method from the Denormalizer, the [DtoMappingFailedException](src/Exception/DtoMappingFailedException.php) will be thrown.
+If an error occurs when the `denormalize()` method is called from the Denormalizer, the [DtoMappingFailedException](src/Exception/DtoMappingFailedException.php) will be thrown.
 
 ### 5. Validate
 Whether to validate the DTO (once the mapping is done). Internally, the [validator component](https://symfony.com/doc/current/validation.html) will be used, and if you do not have it installed a `LogicException` will be thrown.
@@ -190,6 +190,11 @@ Whether to validate the DTO (once the mapping is done). Internally, the [validat
 Example:
 ```php
 #[Dto(validate: true)]
+```
+
+If the validation failed (due to the constraint violations), the constraint violations will be available as request attribute:
+```php
+$request->attributes->get('_constraint_violations')
 ```
 
 If you don't set any value, the configured value (defined in the bundle's configuration file) will be used.
@@ -205,19 +210,14 @@ Example:
 If you don't set any value, the configured value (defined in the bundle's configuration file) will be used.
 
 ### 7. Throw on violation
-If the validation failed (due to the constraint violations), the [DtoValidationFailedException](/src/Exception/DtoValidationFailedException.php) will be thrown, and you will be able to get a list of these violations by calling the `getViolations()` method.
+When the validation failed, the [DtoValidationFailedException](/src/Exception/DtoValidationFailedException.php) will be thrown, and you will be able to get a list of these violations by calling the `getViolations()` method.
 
-Additionally, the constraint violations will be available as request attribute:
-```php
-$request->attributes->get('_constraint_violations')
-```
+Setting the value to `false` will prevent the exception from being thrown, and your controller will still be executed.
 
 Example:
 ```php
-#[Dto(throwOnViolation: true)]
+#[Dto(throwOnViolation: false)]
 ```
-
-Setting the value to `false` will prevent the exception from being thrown, and your controller will still be executed.
 
 If you don't set any value, the configured value (defined in the bundle's configuration file) will be used.
 
