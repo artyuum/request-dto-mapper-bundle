@@ -157,6 +157,10 @@ class ControllerArgumentsEventListener implements EventSubscriberInterface
             $subjectInstance = $event->getArguments()[$index];
 
             foreach ($dtoAttributesFromParameter['attributes'] as $dtoAttribute) {
+                if ($dtoAttribute->getMethods() && !in_array($request->getMethod(), $dtoAttribute->getMethods(), true)) {
+                    continue;
+                }
+
                 $this->mapper->map($dtoAttribute, $subjectInstance);
                 $this->mapper->validate($dtoAttribute, $subjectInstance);
             }
