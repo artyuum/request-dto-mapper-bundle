@@ -8,7 +8,7 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- * This event is dispatched once the validation is done, and it's the last event that is called before your controller is called (if the validation is enabled).
+ * This event is dispatched once the validation is done. If the validation is enabled, this would be the last event that is dispatched before your controller is called.
  */
 class PostDtoValidationEvent extends Event
 {

@@ -7,7 +7,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- * This event is dispatched before the mapping is made, this allows you to alter the Request object for example.
+ * This event is dispatched before the mapping is made, this allows you to alter all the passed objects,
+ * including the extracted data before it's mapped to the DTO.
  */
 class PreDtoMappingEvent extends Event
 {

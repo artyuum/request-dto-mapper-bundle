@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- * This event is dispatched once the mapping is done, and it's the last event that is called before your controller is called (if the validation is NOT enabled).
+ * This event is dispatched once the mapping is done. If the validation is disabled, this would be the last event that is dispatched before your controller is called.
  */
 class PostDtoMappingEvent extends Event
 {
