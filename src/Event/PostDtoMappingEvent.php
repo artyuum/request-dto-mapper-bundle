@@ -2,32 +2,36 @@
 
 namespace Artyum\RequestDtoMapperBundle\Event;
 
-use Artyum\RequestDtoMapperBundle\Annotation\Dto;
-use Artyum\RequestDtoMapperBundle\Mapper\DtoInterface;
+use Artyum\RequestDtoMapperBundle\Attribute\Dto;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- * This event is dispatched at the very end of the mapping (and after the validation if enabled), this allows you to alter the DTO before it's passed to the controller.
+ * This event is dispatched once the mapping is done. If the validation is disabled, this would be the last event that is dispatched before your controller is called.
  */
 class PostDtoMappingEvent extends Event
 {
-    private DtoInterface $dto;
-
-    public function __construct(DtoInterface $dto)
+    public function __construct(private Request $request, private Dto $attribute, private object $subject, private array $data)
     {
-        $this->dto = $dto;
     }
 
-    public function getDto(): DtoInterface
+    public function getRequest(): Request
     {
-        return $this->dto;
+        return $this->request;
     }
 
-    public function setDto(DtoInterface $dto): self
+    public function getAttribute(): Dto
     {
-        $this->dto = $dto;
+        return $this->attribute;
+    }
 
-        return $this;
+    public function getSubject(): object
+    {
+        return $this->subject;
+    }
+
+    public function getData(): array
+    {
+        return $this->data;
     }
 }

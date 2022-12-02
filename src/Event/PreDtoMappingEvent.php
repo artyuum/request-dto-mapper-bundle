@@ -2,29 +2,18 @@
 
 namespace Artyum\RequestDtoMapperBundle\Event;
 
-use Artyum\RequestDtoMapperBundle\Annotation\Dto;
+use Artyum\RequestDtoMapperBundle\Attribute\Dto;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- * This event is dispatched before the mapping is made, this allows you to alter the Serializer/Denormalizer options or the Request object.
+ * This event is dispatched before the mapping is made, this allows you to alter all the passed objects,
+ * including the extracted data before it's mapped to the DTO.
  */
 class PreDtoMappingEvent extends Event
 {
-    private Request $request;
-
-    private string $dto;
-
-    private Dto $dtoAnnotation;
-
-    private array $options;
-
-    public function __construct(Request $request, string $dto, Dto $dtoAnnotation, array $options = [])
+    public function __construct(private Request $request, private Dto $attribute, private object $subject, private array $data)
     {
-        $this->dto = $dto;
-        $this->dtoAnnotation = $dtoAnnotation;
-        $this->request = $request;
-        $this->options = $options;
     }
 
     public function getRequest(): Request
@@ -32,46 +21,23 @@ class PreDtoMappingEvent extends Event
         return $this->request;
     }
 
-    public function setRequest(Request $request): self
+    public function getAttribute(): Dto
     {
-        $this->request = $request;
-
-        return $this;
+        return $this->attribute;
     }
 
-    public function getDto(): string
+    public function getSubject(): object
     {
-        return $this->dto;
+        return $this->subject;
     }
 
-    public function setDto(string $dto): self
+    public function getData(): array
     {
-        $this->dto = $dto;
-
-        return $this;
+        return $this->data;
     }
 
-    public function getDtoAnnotation(): Dto
+    public function setData(array $data): void
     {
-        return $this->dtoAnnotation;
-    }
-
-    public function setDtoAnnotation(Dto $dtoAnnotation): self
-    {
-        $this->dtoAnnotation = $dtoAnnotation;
-
-        return $this;
-    }
-
-    public function getOptions(): array
-    {
-        return $this->options;
-    }
-
-    public function setOptions(array $options): self
-    {
-        $this->options = $options;
-
-        return $this;
+        $this->data = $data;
     }
 }

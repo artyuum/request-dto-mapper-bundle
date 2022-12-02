@@ -1,0 +1,8 @@
+parameters:
+    level: 9
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    reportUnmatchedIgnoredErrors: false
+    paths:
+        - src
+        - tests

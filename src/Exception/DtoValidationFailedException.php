@@ -9,14 +9,14 @@ use Throwable;
 /**
  * Thrown when the DTO validation failed.
  */
-class DtoValidationException extends Exception
+class DtoValidationFailedException extends Exception
 {
     private ConstraintViolationListInterface $violations;
 
-    public function __construct(ConstraintViolationListInterface $violations, $message = '', $code = 0, Throwable $previous = null)
+    public function __construct(ConstraintViolationListInterface $violations, string $message = 'There is one or more constraint violations for the passed DTO.', int $code = 0, Throwable $previous = null)
     {
-        parent::__construct($message, $code, $previous);
         $this->violations = $violations;
+        parent::__construct($message, $code, $previous);
     }
 
     public function getViolations(): ConstraintViolationListInterface

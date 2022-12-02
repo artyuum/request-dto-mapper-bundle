@@ -4,3 +4,9 @@
 # Composer
 vendor/
 composer.lock
+
+# PHPUnit
+.phpunit.cache
+
+# PHPCSFixer
+.php-cs-fixer.cache

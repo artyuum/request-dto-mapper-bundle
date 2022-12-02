@@ -2,21 +2,32 @@
 
 namespace Artyum\RequestDtoMapperBundle\DependencyInjection;
 
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Artyum\RequestDtoMapperBundle\Mapper\Mapper;
+use Artyum\RequestDtoMapperBundle\Extractor\ExtractorInterface;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
-class ArtyumRequestDtoMapperExtension extends Extension
+class ArtyumRequestDtoMapperExtension extends ConfigurableExtension
 {
-    public function load(array $configs, ContainerBuilder $container): void
+    /**
+     * {@inheritdoc}
+     */
+    protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
-        $configuration = new Configuration();
-        $config = $this->processConfiguration($configuration, $configs);
+        $loader = new PhpFileLoader($container, new FileLocator(dirname(__DIR__) . '/Resources/config'));
+        $loader->load('services.php');
 
-        $loader = new Loader\XmlFileLoader($container, new FileLocator(dirname(__DIR__) . '/Resources/config'));
-        $loader->load('services.xml');
+        $container
+            ->registerForAutoconfiguration(ExtractorInterface::class)
+            ->addTag('artyum_request_dto_mapper.extractor')
+        ;
 
-        $container->setParameter('artyum_request_dto_mapper.enabled', $config['enabled']);
+        $container->getDefinition(Mapper::class)
+            ->replaceArgument(0, $mergedConfig['denormalizer'])
+            ->replaceArgument(1, $mergedConfig['validation'])
+            ->replaceArgument(7, $mergedConfig['default_extractor'])
+        ;
     }
 }
