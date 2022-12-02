@@ -156,9 +156,7 @@ If you're setting the attribute on the method argument instead, the "subject" va
 public function __invoke(#[Dto] PostPayload $postPayload): Response
 {
 }
-``` 
-
-This is a shorter way of marking an argument that will be handled by this bundle, but if you have to set many options on the attribute, it's recommended to set the attribute on the method instead.
+```
 
 ### 3. Methods
 It can contain a single or an array of HTTP methods that will "enable" the mapping/validation depending on the current HTTP method. In the following example, the DTO will be mapped & validated only if the request method is "GET".
