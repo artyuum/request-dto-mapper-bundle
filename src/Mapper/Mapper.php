@@ -127,8 +127,6 @@ class Mapper
         /** @var Request $request */
         $request = $this->requestStack->getMainRequest();
 
-        $this->eventDispatcher->dispatch(new PreDtoMappingEvent($request, $attribute, $subject));
-
         $extractor = $attribute->getExtractor() ?? $this->defaultExtractorConfiguration;
 
         if (!$extractor) {
@@ -148,15 +146,19 @@ class Mapper
             throw new ExtractionFailedException(previous: $throwable);
         }
 
+        $preDtoMappingEvent = new PreDtoMappingEvent($request, $attribute, $subject, $data);
+
+        $this->eventDispatcher->dispatch($preDtoMappingEvent);
+
         $denormalizerOptions = $this->getDenormalizerOptions($attribute->getDenormalizerOptions());
         $denormalizerOptions[AbstractNormalizer::OBJECT_TO_POPULATE] = $subject;
 
         try {
-            $this->denormalizer->denormalize($data, $subject::class, null, $denormalizerOptions);
+            $this->denormalizer->denormalize($preDtoMappingEvent->getData(), $subject::class, null, $denormalizerOptions);
         } catch (Throwable $throwable) {
             throw new DtoMappingFailedException(previous: $throwable);
         }
 
-        $this->eventDispatcher->dispatch(new PostDtoMappingEvent($request, $attribute, $subject));
+        $this->eventDispatcher->dispatch(new PostDtoMappingEvent($request, $attribute, $subject, $data));
     }
 }
