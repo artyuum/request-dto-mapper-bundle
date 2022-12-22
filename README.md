@@ -44,7 +44,6 @@ artyum_request_dto_mapper:
         # Whether to throw an exception if the DTO validation failed (constraint violations).
         throw_on_violation: true
 ```
-[The recipe is still awaiting approval](https://github.com/symfony/recipes-contrib/pull/1438). In the meantime, you must create the configuration file manually.
 
 ## Usage
 This is a simple step-by-step example of how to make a DTO that will be used by the bundle.
